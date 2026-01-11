@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
+import { loginWithEmail, storeAuthData } from '../../services/authService';
 
 /**
  * Simple Login Page
@@ -32,18 +33,6 @@ export default function LoginPage() {
         return "";
     };
 
-    const fakeLoginRequest = (email, password) =>
-        new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // demo credentials
-                if (email === "user@example.com" && password === "password") {
-                    resolve({ token: "demo-token-abc123", user: { email } });
-                } else {
-                    reject(new Error("Invalid email or password."));
-                }
-            }, 800);
-        });
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -55,13 +44,11 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
-            // Replace fakeLoginRequest with real API call:
-            // const res = await fetch("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) ... })
-            const res = await fakeLoginRequest(email, password);
-            const storage = remember ? localStorage : sessionStorage;
-            storage.setItem("authToken", res.token);
-            storage.setItem("authUser", JSON.stringify(res.user));
-            storage.setItem("user_role", "broker"); // Set user as broker
+            const data = await loginWithEmail(email, password);
+
+            // Store authentication data
+            const userInfo = { email: email };
+            storeAuthData(data, userInfo, remember);
 
             // Redirect to app home (adjust route as needed)
             navigate("/", { replace: true });

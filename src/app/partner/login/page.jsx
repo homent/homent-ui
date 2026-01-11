@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
+import { loginWithEmail, loginWithPhone, storeAuthData } from '../../services/authService';
 
 /**
  * Partner Login Page
@@ -44,20 +45,6 @@ export default function LoginPage() {
         return "";
     };
 
-    const fakeLoginRequest = (credentials) =>
-        new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // demo credentials
-                if (loginMethod === "email" && credentials.email === "user@example.com" && credentials.password === "password") {
-                    resolve({ token: "demo-token-abc123", user: { email: credentials.email } });
-                } else if (loginMethod === "phone" && credentials.phone === "9876543210" && credentials.otp === "123456") {
-                    resolve({ token: "demo-token-xyz789", user: { phone: credentials.phone } });
-                } else {
-                    reject(new Error("Invalid credentials."));
-                }
-            }, 800);
-        });
-
     const sendOtpRequest = (phoneNumber) =>
         new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -100,15 +87,20 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
-            const credentials = loginMethod === "email"
-                ? { email, password }
-                : { phone, otp };
+            let data;
 
-            const res = await fakeLoginRequest(credentials);
-            const storage = remember ? localStorage : sessionStorage;
-            storage.setItem("authToken", res.token);
-            storage.setItem("authUser", JSON.stringify(res.user));
-            storage.setItem("user_role", "broker"); // Set user as broker
+            if (loginMethod === "email") {
+                data = await loginWithEmail(email, password);
+            } else {
+                data = await loginWithPhone(phone, otp);
+            }
+
+            // Store authentication data
+            const userInfo = {
+                email: loginMethod === "email" ? email : undefined,
+                phone: loginMethod === "phone" ? phone : undefined,
+            };
+            storeAuthData(data, userInfo, remember);
 
             // Redirect to app home (adjust route as needed)
             navigate("/", { replace: true });

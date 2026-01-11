@@ -10,7 +10,7 @@ import {
   callWorkDetailsAPI,
   callDocumentsAPI,
   callBankDetailsAPI
-} from '../../../services/partnerRegistration';
+} from '../../services/partnerRegistration';
 
 export default function PartnerRegisterPage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -179,7 +179,7 @@ export default function PartnerRegisterPage() {
           return;
         }
       } else if (currentStep === 2) {
-        result = await callWorkDetailsAPI(formData);
+        result = await callWorkDetailsAPI(formData, userId);
         if (result.success) {
           toast.success("Work details submitted successfully");
         } else {

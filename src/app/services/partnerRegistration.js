@@ -1,7 +1,8 @@
 // Partner Registration API Services
 // Contains all API calls for the partner registration flow
 
-const API_BASE_URL = "http://35.154.207.226:7071/api/v1/homent";
+const API_BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL + "/homent";
+
 
 /**
  * API call for Step 1: Basic Details
@@ -57,12 +58,13 @@ export const callBasicDetailsAPI = async (formData) => {
  * @param {Object} formData - Form data from the registration form
  * @returns {Promise<Object>} - API response
  */
-export const callWorkDetailsAPI = async (formData) => {
+export const callWorkDetailsAPI = async (formData, userId) => {
   try {
     const payload = {
       totalExperience: parseInt(formData.totalExperience),
       servingAreas: formData.servingAreas.join(", "),
       specialization: formData.specialization || undefined,
+      id: userId,
     };
 
     const response = await fetch(`${API_BASE_URL}?eventType=ADD_BROKER_WORK_DETAIL`, {
