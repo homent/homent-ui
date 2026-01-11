@@ -61,6 +61,7 @@ export default function LoginPage() {
             const storage = remember ? localStorage : sessionStorage;
             storage.setItem("authToken", res.token);
             storage.setItem("authUser", JSON.stringify(res.user));
+            storage.setItem("user_role", "broker"); // Set user as broker
 
             // Redirect to app home (adjust route as needed)
             navigate("/", { replace: true });

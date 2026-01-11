@@ -49,7 +49,7 @@ export default function SiteHeader({ title, Icon }) {
             <div className="flex items-center gap-2">
               {Icon && <Icon className="h-8 w-8 text-white-600" />}
               <span className="text-xl font-bold text-white-900">
-                EstateHubster
+                Homent
               </span>
               {title && (
                 <span className="hidden sm:block text-md text-white-700">
@@ -149,19 +149,19 @@ export default function SiteHeader({ title, Icon }) {
               <nav className="flex items-center gap-3">
                 <a
                   href="/"
-                  className="text-gray-700 hover:text-blue-600 transition-colors"
+                  className="text-white-700 hover:text-white-600 transition-colors"
                 >
                   Home
                 </a>
                 <a
                   href="/partner/login"
-                  className="hidden sm:block text-gray-700 border border-blue-600 px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
+                  className="hidden sm:block text-white-700 border border-blue-600 px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
                 >
                   Login
                 </a>
                 <a
                   href="/partner/register"
-                  className="hidden sm:block text-gray-700 border border-blue-600 px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
+                  className="hidden sm:block text-white border border-blue-600 px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
                 >
                   Signup Now
                 </a>

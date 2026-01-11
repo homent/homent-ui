@@ -10,6 +10,8 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from 'sonner';
+import Select from 'react-select'
+import { countries, states, cities } from '../services/constant';
 import SiteHeader from "@/components/SiteHeader";
 
 
@@ -251,13 +253,14 @@ export default function LegalServicesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     City *
                   </label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => updateFormData("city", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Your city"
-                    required
+                  <Select
+                    options={cities}
+                    value={cities.find(city => city.value === formData.city) || null}
+                    onChange={(selectedOption) =>
+                      updateFormData('city', selectedOption?.value || '')
+                    }
+                    placeholder="Select city"
+                    isClearable
                   />
                 </div>
 
@@ -265,17 +268,15 @@ export default function LegalServicesPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     State *
                   </label>
-                  <select
-                    value={formData.state}
-                    onChange={(e) => updateFormData("state", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="Maharashtra">Maharashtra</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <option value="Delhi">Delhi</option>
-                    <option value="Gujarat">Gujarat</option>
-                    <option value="Tamil Nadu">Tamil Nadu</option>
-                  </select>
+                  <Select
+                    options={states}
+                    value={states.find(state => state.value === formData.state) || null}
+                    onChange={(selectedOption) =>
+                      updateFormData('state', selectedOption?.value || '')
+                    }
+                    placeholder="Select state"
+                    isClearable
+                  />
                 </div>
 
                 <div>

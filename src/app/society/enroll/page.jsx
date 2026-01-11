@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Building2 } from "lucide-react";
 import { toast } from "sonner";
 import Select from 'react-select'
-import { countries, states, cities, apartmentTypeOptions } from './../../services/constant';
+import { countries, states, cities, apartmentTypeOptions } from '../../services/constant';
 import { enrollSociety, uploadSocietyFiles } from './../../services/society';
 
 export default function EnrollSocietyPage() {

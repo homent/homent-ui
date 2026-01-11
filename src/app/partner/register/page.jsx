@@ -3,23 +3,38 @@
 import { useState } from "react";
 import { Building2, ArrowRight, ArrowLeft, Check, Upload } from "lucide-react";
 import { toast } from 'sonner';
+import Select from 'react-select'
+import { countries, states, cities } from '../../services/constant';
+import {
+  callBasicDetailsAPI,
+  callWorkDetailsAPI,
+  callDocumentsAPI,
+  callBankDetailsAPI
+} from '../../../services/partnerRegistration';
 
 export default function PartnerRegisterPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [userId, setUserId] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     mobile: "",
+    countryCode: "+91",
     gender: "",
     dateOfBirth: "",
     address: "",
+    city: "",
+    state: "",
+    country: "India",
+    pincode: "",
     password: "",
     confirmPassword: "",
     servingAreas: [],
     totalExperience: "",
+    specialization: "",
     knownLanguages: [],
     commissionPercentage: "",
     businessContactNumber: "",
@@ -27,6 +42,7 @@ export default function PartnerRegisterPage() {
     aadharFront: null,
     aadharBack: null,
     panLicense: null,
+    drivingLicense: null,
     photo: null,
     bankingName: "",
     bankName: "",
@@ -93,7 +109,7 @@ export default function PartnerRegisterPage() {
         !formData.address ||
         !formData.password
       ) {
-        setError("All fields are required");
+        setError("All required fields are required");
         return false;
       }
       if (formData.password !== formData.confirmPassword) {
@@ -107,22 +123,14 @@ export default function PartnerRegisterPage() {
     } else if (currentStep === 2) {
       if (
         !formData.totalExperience ||
-        !formData.commissionPercentage ||
-        !formData.role ||
-        formData.servingAreas.length === 0 ||
-        formData.knownLanguages.length === 0
+        formData.servingAreas.length === 0
       ) {
-        setError("All fields are required");
+        setError("Total Experience and Serving Areas are required");
         return false;
       }
     } else if (currentStep === 3) {
-      if (
-        !formData.aadharFront ||
-        !formData.aadharBack ||
-        !formData.panLicense ||
-        !formData.photo
-      ) {
-        setError("All documents are required");
+      if (!formData.aadharFront || !formData.aadharBack || !formData.photo) {
+        setError("Aadhar (Front & Back) and Photo are required");
         return false;
       }
     } else if (currentStep === 4) {
@@ -143,9 +151,54 @@ export default function PartnerRegisterPage() {
     return true;
   };
 
-  const nextStep = () => {
-    if (validateStep()) {
+  const skipStep = () => {
+    if (currentStep === 3) {
+      // Skip documents - go to next step
       if (currentStep < 4) setCurrentStep(currentStep + 1);
+    } else if (currentStep === 4) {
+      // Skip bank details - redirect to login
+      window.location.href = "/partner/login";
+    }
+  };
+
+  const nextStep = async () => {
+    if (!validateStep()) return;
+
+    setLoading(true);
+    try {
+      let result;
+
+      if (currentStep === 1) {
+        result = await callBasicDetailsAPI(formData);
+        console.log("Basic Details Result:", result);
+        if (result.success) {
+          setUserId(result.userId);
+          toast.success("Basic details submitted successfully");
+        } else {
+          setError(result.error);
+          return;
+        }
+      } else if (currentStep === 2) {
+        result = await callWorkDetailsAPI(formData);
+        if (result.success) {
+          toast.success("Work details submitted successfully");
+        } else {
+          setError(result.error);
+          return;
+        }
+      } else if (currentStep === 3) {
+        result = await callDocumentsAPI(formData, userId);
+        if (result.success) {
+          toast.success("Documents uploaded successfully");
+        } else {
+          setError(result.error);
+          return;
+        }
+      }
+
+      if (currentStep < 4) setCurrentStep(currentStep + 1);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -158,22 +211,14 @@ export default function PartnerRegisterPage() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/partners", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const result = await callBankDetailsAPI(formData, userId);
 
-      if (response.ok) {
-        toast.success("Registration submitted successfully! We will review your application.");
-        window.location.href = "/";
+      if (result.success) {
+        toast.success("Registration completed successfully! We will review your application.");
+        window.location.href = "/partner/login";
       } else {
-        const data = await response.json();
-        setError(data.error || "Registration failed. Please try again.");
+        setError(result.error);
       }
-    } catch (err) {
-      console.error("Registration error:", err);
-      setError("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -181,18 +226,18 @@ export default function PartnerRegisterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+      <header className="fixed top-0 w-full text-white bg-blue-600 border-b shadow-sm z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">
-                EstateHubster
+              <Building2 className="h-8 w-8 text-white-600" />
+              <span className="text-xl font-bold text-white-900">
+                Homent
               </span>
             </div>
             <a
               href="/"
-              className="text-gray-600 hover:text-blue-600 transition-colors"
+              className="text-white-600 hover:text-black-600 transition-colors"
             >
               Back to Home
             </a>
@@ -203,7 +248,7 @@ export default function PartnerRegisterPage() {
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Become a EstateHubster Partner
+            Become a Homent Partner
           </h1>
           <p className="text-gray-600">
             Join our platform and start earning commissions
@@ -234,10 +279,10 @@ export default function PartnerRegisterPage() {
             ))}
           </div>
           <div className="flex justify-between mt-4 text-sm text-gray-600">
-            <span>Basic Details</span>
-            <span>Work Details</span>
-            <span>Documents</span>
-            <span>Bank Details</span>
+            <span className="flex items-center flex-1">Basic Details</span>
+            <span className="flex items-center flex-1">Work Details</span>
+            <span className="flex items-center flex-1">Documents</span>
+            <span className="flex items-center flex-1">Bank Details</span>
           </div>
         </div>
 
@@ -293,21 +338,40 @@ export default function PartnerRegisterPage() {
           </button>
 
           {currentStep < 4 ? (
-            <button
-              onClick={nextStep}
-              className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Next
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </button>
+            <div className="flex gap-2">
+              {currentStep === 3 && (
+                <button
+                  onClick={skipStep}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Skip Documents
+                </button>
+              )}
+              <button
+                onClick={nextStep}
+                disabled={loading}
+                className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? "Processing..." : "Next"}
+                {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {loading ? "Submitting..." : "Submit Registration"}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={skipStep}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Skip Bank Details
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? "Submitting..." : "Submit Registration"}
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -362,18 +426,33 @@ function BasicDetailsStep({ formData, updateFormData }) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Mobile *
-          </label>
-          <input
-            type="tel"
-            value={formData.mobile}
-            onChange={(e) => updateFormData("mobile", e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="10-digit mobile number"
-            required
-          />
+        <div className="flex gap-2">
+          <div className="w-24">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Country Code
+            </label>
+            <input
+              type="text"
+              value={formData.countryCode}
+              onChange={(e) => updateFormData("countryCode", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="+91"
+              required
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mobile *
+            </label>
+            <input
+              type="tel"
+              value={formData.mobile}
+              onChange={(e) => updateFormData("mobile", e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="10-digit mobile number"
+              required
+            />
+          </div>
         </div>
 
         <div>
@@ -387,9 +466,9 @@ function BasicDetailsStep({ formData, updateFormData }) {
             required
           >
             <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 
@@ -416,6 +495,68 @@ function BasicDetailsStep({ formData, updateFormData }) {
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter your full address"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            City *
+          </label>
+          <Select
+            options={cities}
+            value={cities.find(city => city.value === formData.city) || null}
+            onChange={(selectedOption) =>
+              updateFormData('city', selectedOption?.value || '')
+            }
+            placeholder="Select city"
+            isClearable
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            State *
+          </label>
+          <Select
+            options={states}
+            value={states.find(state => state.value === formData.state) || null}
+            onChange={(selectedOption) =>
+              updateFormData('state', selectedOption?.value || '')
+            }
+            placeholder="Select state"
+            isClearable
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Pincode *
+          </label>
+          <input
+            type="text"
+            value={formData.pincode}
+            onChange={(e) => updateFormData("pincode", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="e.g., 411057"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Country *
+          </label>
+          <Select
+            options={countries}
+            value={countries.find(country => country.value === formData.country) || null}
+            onChange={(selectedOption) =>
+              updateFormData('country', selectedOption?.value || '')
+            }
+            placeholder="Select country"
+            isClearable
             required
           />
         </div>
@@ -524,7 +665,20 @@ function WorkDetailsStep({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Commission Percentage *
+            Specialization
+          </label>
+          <input
+            type="text"
+            value={formData.specialization}
+            onChange={(e) => updateFormData("specialization", e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="e.g., Residential, Commercial"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Commission Percentage
           </label>
           <input
             type="number"
@@ -535,13 +689,12 @@ function WorkDetailsStep({
             }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., 2.5"
-            required
           />
         </div>
 
         <div className="md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Known Languages *
+            Known Languages
           </label>
           <div className="flex gap-2 mb-2">
             <input
@@ -596,7 +749,7 @@ function WorkDetailsStep({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Role/Designation *
+            Role/Designation
           </label>
           <input
             type="text"
@@ -604,7 +757,6 @@ function WorkDetailsStep({
             onChange={(e) => updateFormData("role", e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="e.g., Real Estate Agent, Broker"
-            required
           />
         </div>
       </div>
@@ -679,7 +831,7 @@ function DocumentsStep({ formData, updateFormData }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            PAN Card / Driving License *
+            PAN Card
           </label>
           <div className="relative">
             <input
@@ -689,12 +841,36 @@ function DocumentsStep({ formData, updateFormData }) {
                 handleFileChange("panLicense", e.target.files?.[0])
               }
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              required
             />
             <div className="px-3 py-2 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-500 transition-colors">
               <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
               <p className="text-sm text-gray-600">
                 {getFileName(formData.panLicense)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Click to upload image or PDF
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Driving License
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) =>
+                handleFileChange("drivingLicense", e.target.files?.[0])
+              }
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <div className="px-3 py-2 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-500 transition-colors">
+              <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">
+                {getFileName(formData.drivingLicense)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 Click to upload image or PDF
@@ -733,9 +909,9 @@ function DocumentsStep({ formData, updateFormData }) {
           Document Requirements:
         </h3>
         <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Aadhar card (both sides) - clear, legible copy</li>
-          <li>• PAN card or Driving License</li>
-          <li>• Passport-size photo (clear face visible)</li>
+          <li>• Aadhar card (both sides) - clear, legible copy *</li>
+          <li>• PAN card or Driving License - at least one required</li>
+          <li>• Passport-size photo (clear face visible) *</li>
           <li>• Maximum file size: 5MB each</li>
         </ul>
       </div>

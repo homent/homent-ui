@@ -4,45 +4,90 @@ import { toast } from 'sonner';
 
 /**
  * Partner Login Page
- * - Controlled inputs for email/password
- * - Basic client-side validation
- * - Simulated API call (replace with real /api/auth/login)
- * - Stores token in localStorage (or sessionStorage if not remembered)
- *
- * Saved as: /src/app/partner/login/page.jsx so FS routing picks it up
+ * - Supports both email/password and phone/OTP login
+ * - Phone login requires OTP verification (password not allowed)
+ * - Sign in button enabled only after phone number and OTP are entered
+ * - Controlled inputs with validation
+ * - API integration for authentication
  */
 
 export default function LoginPage() {
     const navigate = useNavigate();
 
+    const [loginMethod, setLoginMethod] = useState("email"); // "email" or "phone"
     const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
+    const [otp, setOtp] = useState("");
+    const [otpSent, setOtpSent] = useState(false);
     const [remember, setRemember] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
 
     const [loading, setLoading] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
     const [error, setError] = useState("");
 
     const validate = () => {
-        if (!email) return "Email is required.";
-        // simple email check
-        if (!/^\S+@\S+\.\S+$/.test(email)) return "Enter a valid email.";
-        if (!password) return "Password is required.";
-        if (password.length < 6) return "Password must be at least 6 characters.";
+        if (loginMethod === "email") {
+            if (!email) return "Email is required.";
+            if (!/^\S+@\S+\.\S+$/.test(email)) return "Enter a valid email.";
+            if (!password) return "Password is required.";
+            if (password.length < 6) return "Password must be at least 6 characters.";
+        } else {
+            // Phone login - OTP required
+            if (!phone) return "Phone number is required.";
+            if (!/^\d{10}$/.test(phone.replace(/\D/g, ''))) return "Enter a valid 10-digit phone number.";
+            if (!otpSent) return "Please send OTP first.";
+            if (!otp) return "OTP is required.";
+            if (otp.length !== 6) return "Enter a valid 6-digit OTP.";
+        }
         return "";
     };
 
-    const fakeLoginRequest = (email, password) =>
+    const fakeLoginRequest = (credentials) =>
         new Promise((resolve, reject) => {
             setTimeout(() => {
                 // demo credentials
-                if (email === "user@example.com" && password === "password") {
-                    resolve({ token: "demo-token-abc123", user: { email } });
+                if (loginMethod === "email" && credentials.email === "user@example.com" && credentials.password === "password") {
+                    resolve({ token: "demo-token-abc123", user: { email: credentials.email } });
+                } else if (loginMethod === "phone" && credentials.phone === "9876543210" && credentials.otp === "123456") {
+                    resolve({ token: "demo-token-xyz789", user: { phone: credentials.phone } });
                 } else {
-                    reject(new Error("Invalid email or password."));
+                    reject(new Error("Invalid credentials."));
                 }
             }, 800);
         });
+
+    const sendOtpRequest = (phoneNumber) =>
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                if (phoneNumber === "9876543210") {
+                    resolve({ success: true, message: "OTP sent successfully" });
+                } else {
+                    reject(new Error("Failed to send OTP. Please check your phone number."));
+                }
+            }, 1000);
+        });
+
+    const handleSendOtp = async () => {
+        if (!phone || !/^\d{10}$/.test(phone.replace(/\D/g, ''))) {
+            setError("Enter a valid 10-digit phone number.");
+            return;
+        }
+
+        setOtpLoading(true);
+        setError("");
+
+        try {
+            await sendOtpRequest(phone);
+            setOtpSent(true);
+            toast.success("OTP sent to your phone number");
+        } catch (err) {
+            setError(err.message || "Failed to send OTP.");
+        } finally {
+            setOtpLoading(false);
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -55,10 +100,15 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
-            const res = await fakeLoginRequest(email, password);
+            const credentials = loginMethod === "email"
+                ? { email, password }
+                : { phone, otp };
+
+            const res = await fakeLoginRequest(credentials);
             const storage = remember ? localStorage : sessionStorage;
             storage.setItem("authToken", res.token);
             storage.setItem("authUser", JSON.stringify(res.user));
+            storage.setItem("user_role", "broker"); // Set user as broker
 
             // Redirect to app home (adjust route as needed)
             navigate("/", { replace: true });
@@ -69,6 +119,19 @@ export default function LoginPage() {
         }
     };
 
+    const switchLoginMethod = (method) => {
+        setLoginMethod(method);
+        setError("");
+        setOtpSent(false);
+        setOtp("");
+        if (method === "email") {
+            setPhone("");
+        } else {
+            setEmail("");
+            setPassword(""); // Clear password when switching to phone
+        }
+    };
+
     return (
         <div style={styles.page}>
             <form onSubmit={handleSubmit} style={styles.card} aria-labelledby="login-heading">
@@ -76,44 +139,127 @@ export default function LoginPage() {
                     Sign in
                 </h2>
 
+                {/* Login Method Toggle */}
+                <div style={styles.methodToggle}>
+                    <button
+                        type="button"
+                        onClick={() => switchLoginMethod("email")}
+                        style={{
+                            ...styles.methodBtn,
+                            ...(loginMethod === "email" ? styles.methodBtnActive : {})
+                        }}
+                        disabled={loading}
+                    >
+                        Email
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => switchLoginMethod("phone")}
+                        style={{
+                            ...styles.methodBtn,
+                            ...(loginMethod === "phone" ? styles.methodBtnActive : {})
+                        }}
+                        disabled={loading}
+                    >
+                        Phone
+                    </button>
+                </div>
+
                 {error && <div role="alert" style={styles.error}>{error}</div>}
 
-                <label style={styles.label}>
-                    Email
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={styles.input}
-                        placeholder="you@example.com"
-                        autoComplete="username"
-                        disabled={loading}
-                    />
-                </label>
+                {loginMethod === "email" ? (
+                    <>
+                        <label style={styles.label}>
+                            Email
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                style={styles.input}
+                                placeholder="you@example.com"
+                                autoComplete="username"
+                                disabled={loading}
+                            />
+                        </label>
 
-                <label style={styles.label}>
-                    Password
-                    <div style={styles.passwordRow}>
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ ...styles.input, marginBottom: 0, flex: 1 }}
-                            placeholder="••••••••"
-                            autoComplete="current-password"
-                            disabled={loading}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword((s) => !s)}
-                            style={styles.showBtn}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
-                            disabled={loading}
-                        >
-                            {showPassword ? "Hide" : "Show"}
-                        </button>
-                    </div>
-                </label>
+                        <label style={styles.label}>
+                            Password
+                            <div style={styles.passwordRow}>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    style={{ ...styles.input, marginBottom: 0, flex: 1 }}
+                                    placeholder="••••••••"
+                                    autoComplete="current-password"
+                                    disabled={loading}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((s) => !s)}
+                                    style={styles.showBtn}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                    disabled={loading}
+                                >
+                                    {showPassword ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                        </label>
+                    </>
+                ) : (
+                    <>
+                        <label style={styles.label}>
+                            Phone Number
+                            <input
+                                type="tel"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                                style={styles.input}
+                                placeholder="9876543210"
+                                autoComplete="tel"
+                                disabled={loading}
+                            />
+                        </label>
+
+                        {!otpSent ? (
+                            <button
+                                type="button"
+                                onClick={handleSendOtp}
+                                style={styles.sendOtpBtn}
+                                disabled={otpLoading || loading}
+                            >
+                                {otpLoading ? "Sending OTP..." : "Send OTP"}
+                            </button>
+                        ) : (
+                            <label style={styles.label}>
+                                Enter OTP
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    style={styles.input}
+                                    placeholder="123456"
+                                    autoComplete="one-time-code"
+                                    disabled={loading}
+                                />
+                                <small style={styles.otpHint}>
+                                    OTP sent to {phone}
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setOtpSent(false);
+                                            setOtp("");
+                                        }}
+                                        style={styles.resendBtn}
+                                        disabled={loading}
+                                    >
+                                        Change number
+                                    </button>
+                                </small>
+                            </label>
+                        )}
+                    </>
+                )}
 
                 <div style={styles.row}>
                     <label style={styles.checkboxLabel}>
@@ -123,7 +269,7 @@ export default function LoginPage() {
                             onChange={(e) => setRemember(e.target.checked)}
                             disabled={loading}
                         />
-                        Remember me
+                        Remember
                     </label>
 
                     <button
@@ -136,7 +282,14 @@ export default function LoginPage() {
                     </button>
                 </div>
 
-                <button type="submit" style={styles.submit} disabled={loading}>
+                <button 
+                    type="submit" 
+                    style={styles.submit} 
+                    disabled={
+                        loading || 
+                        (loginMethod === "phone" && (!phone || !otpSent || !otp || otp.length !== 6))
+                    }
+                >
                     {loading ? "Signing in..." : "Sign in"}
                 </button>
 
@@ -144,23 +297,22 @@ export default function LoginPage() {
                     <span>Don't have an account?</span>
                     <button
                         type="button"
-                        // onClick={() => navigate("/partner/register")}
                         style={styles.linkBtn}
                         disabled={loading}
                     >
-                        <a href="/partner/register" className="hover:text-white">
+                        <a href="/partner/register" className="hover:text-blue-600">
                             Create account
                         </a>
                     </button>
                 </div>
 
-                <div style={styles.hrRow}>
+                {/* <div style={styles.hrRow}>
                     <span style={styles.hrLine} />
                     <small style={{ margin: "0 12px", color: "#666" }}>or</small>
                     <span style={styles.hrLine} />
-                </div>
+                </div> */}
 
-                <div style={styles.oauthRow}>
+                {/* <div style={styles.oauthRow}>
                     <button
                         type="button"
                         style={styles.oauthBtn}
@@ -177,7 +329,7 @@ export default function LoginPage() {
                     >
                         Continue with GitHub
                     </button>
-                </div>
+                </div> */}
             </form>
         </div>
     );
@@ -205,6 +357,26 @@ const styles = {
         gap: 12,
     },
     title: { margin: 0, fontSize: 20 },
+    methodToggle: {
+        display: "flex",
+        borderRadius: 6,
+        border: "1px solid #d0d7de",
+        overflow: "hidden",
+        marginBottom: 8,
+    },
+    methodBtn: {
+        flex: 1,
+        padding: "8px 12px",
+        border: "none",
+        background: "#fff",
+        cursor: "pointer",
+        fontSize: 14,
+        transition: "background-color 0.2s",
+    },
+    methodBtnActive: {
+        background: "#0366d6",
+        color: "#fff",
+    },
     label: { display: "flex", flexDirection: "column", gap: 8, fontSize: 13, color: "#333" },
     input: {
         marginTop: 4,
@@ -222,6 +394,34 @@ const styles = {
         border: "1px solid #d0d7de",
         background: "#fff",
         cursor: "pointer",
+    },
+    sendOtpBtn: {
+        padding: "10px 12px",
+        fontSize: 14,
+        borderRadius: 6,
+        border: "1px solid #0366d6",
+        background: "#fff",
+        color: "#0366d6",
+        cursor: "pointer",
+        marginTop: 8,
+    },
+    orDivider: { display: "flex", alignItems: "center", margin: "16px 0" },
+    orLine: { flex: 1, height: 1, background: "#e6e9ef" },
+    otpHint: {
+        fontSize: 12,
+        color: "#666",
+        marginTop: 4,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    resendBtn: {
+        border: "none",
+        background: "transparent",
+        color: "#0366d6",
+        cursor: "pointer",
+        fontSize: 12,
+        padding: 0,
     },
     row: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 },
     checkboxLabel: { display: "flex", gap: 8, alignItems: "center", fontSize: 13 },

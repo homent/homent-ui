@@ -88,7 +88,7 @@ export default function PropertyDetailPage({ params }) {
     });
 
     const uploadResp = await fetch(
-      `${BASE_URL}/api/v1/homent?userId=1&eventType=ADD_PROPERTY_FILES&propertyId=${propertyId}`,
+      `${BASE_URL}/homent?userId=1&eventType=ADD_PROPERTY_FILES&propertyId=${propertyId}`,
       {
         method: "PUT",
         body: formData,
@@ -121,7 +121,7 @@ export default function PropertyDetailPage({ params }) {
       });
 
       const response = await fetch(
-        `${BASE_URL}/api/v1/homent?${queryParams.toString()}`
+        `${BASE_URL}/homent?${queryParams.toString()}`
       );
       console.log("Fetch property response:", response);
       if (response.ok) {
@@ -288,7 +288,7 @@ export default function PropertyDetailPage({ params }) {
     }
 
     const response = await fetch(
-      `${BASE_URL}/api/v1/homent?userId=1&eventType=UPDATE_PROPERTY`,
+      `${BASE_URL}/homent?userId=1&eventType=UPDATE_PROPERTY`,
       {
         method: "POST",
         headers: {
@@ -332,7 +332,7 @@ export default function PropertyDetailPage({ params }) {
 
     try {
       const res = await fetch(
-        `${BASE_URL}/api/v1/homent?userId=1&eventType=DELETE_PROPERTY&propertyId=${property.id}`,
+        `${BASE_URL}/homent?userId=1&eventType=DELETE_PROPERTY&propertyId=${property.id}`,
         {
           method: "POST",
           headers: {
@@ -489,7 +489,7 @@ export default function PropertyDetailPage({ params }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Building2 className="h-8 w-8 text-white" />
-            <span className="text-xl font-bold text-white">EstateHubster</span>
+            <span className="text-xl font-bold text-white">Homent</span>
           </div>
           <a
             href="/properties"
@@ -1332,7 +1332,7 @@ function CreatePropertyForm() {
     });
 
     const uploadResp = await fetch(
-      `${BASE_URL}/api/v1/homent?userId=1&eventType=ADD_PROPERTY_FILES&propertyId=${propertyId}`,
+      `${BASE_URL}/homent?userId=1&eventType=ADD_PROPERTY_FILES&propertyId=${propertyId}`,
       {
         method: "PUT",
         body: formData,
@@ -1356,7 +1356,7 @@ const handleSubmit = async (e) => {
     const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
 
     // API call
-    const response = await fetch(`${BASE_URL}/api/v1/homent?userId=1&eventType=ADD_PROPERTY`, {
+    const response = await fetch(`${BASE_URL}/homent?userId=1&eventType=ADD_PROPERTY`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1393,7 +1393,7 @@ const handleSubmit = async (e) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Building2 className="h-8 w-8 text-white-600" />
-            <span className="text-xl font-bold text-white-900">EstateHubster</span>
+            <span className="text-xl font-bold text-white-900">Homent</span>
           </div>
           <a href="/properties" className="text-white-600 hover:text-white-700 transition-colors">← Back to Properties</a>
         </div>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Building2, Calculator, FileText, Download } from "lucide-react";
+import Select from 'react-select'
+import { countries, states, cities } from '../services/constant';
 
 export default function CostCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -115,7 +117,7 @@ Generated on: ${new Date().toLocaleDateString()}
             <div className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-blue-600" />
               <span className="text-xl font-bold text-gray-900">
-                EstateHubster
+                Homent
               </span>
             </div>
             <nav className="hidden md:flex space-x-8">
@@ -198,45 +200,32 @@ Generated on: ${new Date().toLocaleDateString()}
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   State
                 </label>
-                <select
-                  value={formData.state}
-                  onChange={(e) => updateFormData("state", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Karnataka">Karnataka</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Gujarat">Gujarat</option>
-                  <option value="Tamil Nadu">Tamil Nadu</option>
-                </select>
+                <Select
+                  options={states}
+                  value={states.find(state => state.value === formData.state) || null}
+                  onChange={(selectedOption) => {
+                    updateFormData('state', selectedOption?.value || '');
+                    // Reset city when state changes
+                    updateFormData('city', '');
+                  }}
+                  placeholder="Select state"
+                  isClearable
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   City
                 </label>
-                <select
-                  value={formData.city}
-                  onChange={(e) => updateFormData("city", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {formData.state === "Maharashtra" && (
-                    <>
-                      <option value="Pune">Pune</option>
-                      <option value="Mumbai">Mumbai</option>
-                      <option value="Nagpur">Nagpur</option>
-                    </>
-                  )}
-                  {formData.state === "Karnataka" && (
-                    <>
-                      <option value="Bangalore">Bangalore</option>
-                      <option value="Mysore">Mysore</option>
-                    </>
-                  )}
-                  {formData.state === "Delhi" && (
-                    <option value="New Delhi">New Delhi</option>
-                  )}
-                </select>
+                <Select
+                  options={cities}
+                  value={cities.find(city => city.value === formData.city) || null}
+                  onChange={(selectedOption) =>
+                    updateFormData('city', selectedOption?.value || '')
+                  }
+                  placeholder="Select city"
+                  isClearable
+                />
               </div>
 
               <div className="flex items-center">

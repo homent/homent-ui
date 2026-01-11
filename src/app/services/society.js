@@ -8,21 +8,21 @@ export async function getSocieties({
   pageNumber = 0,
   pageSize = 20,
 }) {
-  const url = `${BASE_URL}/api/v1/homent?eventType=GET_SOCIETY&userId=${userId}&status=${status}&pageNumber=${pageNumber}&pageSize=${pageSize}`;
+  const url = `${BASE_URL}/homent?eventType=GET_SOCIETY&userId=${userId}&status=${status}&pageNumber=${pageNumber}&pageSize=${pageSize}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch societies");
   return res.json();
 }
 
 export async function getSocietyById(societyId, userId = 1) {
-  const url = `${BASE_URL}/api/v1/homent?eventType=GET_SOCIETY_SINGLE&userId=${userId}&societyId=${societyId}`;
+  const url = `${BASE_URL}/homent?eventType=GET_SOCIETY_SINGLE&userId=${userId}&societyId=${societyId}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch society");
   return res.json();
 }
 
 export async function enrollSociety(payload, userId = 1) {
-  const url = `${BASE_URL}/api/v1/homent?eventType=ADD_SOCIETY&userId=${userId}`;
+  const url = `${BASE_URL}/homent?eventType=ADD_SOCIETY&userId=${userId}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -35,7 +35,7 @@ export async function enrollSociety(payload, userId = 1) {
 }
 
 export async function deleteSociety(societyId, userId = 1) {
-  const url = `${BASE_URL}/api/v1/homent?eventType=DELETE_SOCIETY&userId=${userId}&societyId=${societyId}`;
+  const url = `${BASE_URL}/homent?eventType=DELETE_SOCIETY&userId=${userId}&societyId=${societyId}`;
   const response = await fetch(url, {
     method: 'POST',
   });
@@ -44,7 +44,7 @@ export async function deleteSociety(societyId, userId = 1) {
 }
 
 export async function updateSociety(societyId, payload, userId = 1) {
-  const url = `${BASE_URL}/api/v1/homent?eventType=UPDATE_SOCIETY&userId=${userId}`;
+  const url = `${BASE_URL}/homent?eventType=UPDATE_SOCIETY&userId=${userId}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -68,9 +68,9 @@ export async function uploadSocietyFiles(societyId, files, userId = 1) {
   });
 
   const uploadResp = await fetch(
-    `${BASE_URL}/api/v1/homent?userId=${userId}&eventType=ADD_SOCIETY_FILES&societyId=${societyId}`,
+    `${BASE_URL}/homent?societyId=${societyId}&userId=${userId}&eventType=ADD_SOCIETY_FILES`,
     {
-      method: "POST",
+      method: "PUT",
       body: formData,
     }
   );

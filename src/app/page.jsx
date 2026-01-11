@@ -24,7 +24,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-blue-600" />
               <span className="text-xl font-bold text-gray-900">
-                EstateHubster
+                Homent
               </span>
             </div>
             <nav className="hidden md:flex space-x-8"> */}
@@ -150,7 +150,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center space-x-2 mb-4">
                 <Building2 className="h-6 w-6" />
-                <span className="text-lg font-bold">EstateHubster</span>
+                <span className="text-lg font-bold">Homent</span>
               </div>
               <p className="text-gray-400">
                 Your trusted partner for all property needs in India.
@@ -194,18 +194,18 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4">Get in touch</h3>
               <p className="text-gray-400">
-                Email: support@EstateHubster.com
+                Email: support@Homent.com
                 <br />
                 Phone: +91 92420 08535
               </p>
             </div>
           </div>
           <div className="mt-8 border-t border-gray-800 pt-8 text-left text-gray-400">
-            <h3 className="font-semibold mb-4 text-white">About EstateHubster (EstateHubster.in): </h3>
-            EstateHubster is a comprehensive property management and services platform designed to simplify real estate transactions and related services in India. Our mission is to provide a seamless experience for property buyers, sellers, renters, and service providers by integrating various property-related services into one easy-to-use platform.
+            <h3 className="font-semibold mb-4 text-white">About Homent (Homent.in): </h3>
+            Homent is a comprehensive property management and services platform designed to simplify real estate transactions and related services in India. Our mission is to provide a seamless experience for property buyers, sellers, renters, and service providers by integrating various property-related services into one easy-to-use platform.
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 EstateHubster. All rights reserved.</p>
+            <p>&copy; 2025 Homent. All rights reserved.</p>
           </div>
         </div>
       </footer>

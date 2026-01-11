@@ -42,6 +42,9 @@ export default function PropertiesPage() {
 
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState({
     listingType: "",
     propertyType: "",
@@ -54,23 +57,51 @@ export default function PropertiesPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    fetchProperties();
+    // Reset pagination when filters change
+    setCurrentPage(0);
+    setHasMore(true);
+    fetchProperties(0, false);
   }, [filters]);
 
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingMore || !hasMore) return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Load more when user is within 200px of bottom
+      if (scrollTop + windowHeight >= documentHeight - 200) {
+        const nextPage = currentPage + 1;
+        setCurrentPage(nextPage);
+        fetchProperties(nextPage, true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentPage, loadingMore, hasMore]);
+
   // Fetch properties from API with applied filters
-  const fetchProperties = async () => {
+  const fetchProperties = async (page = 0, append = false) => {
   const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;;
 console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
 
   try {
-    setLoading(true);
+    if (!append) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
 
     // Base query params required by new API
     const queryParams = new URLSearchParams({
       eventType: "GET_PROPERTY",
       // userId: 1,
       status: "Active",
-      pageNumber: 0,
+      pageNumber: page,
       pageSize: 20,
     });
 
@@ -83,7 +114,7 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/v1/homent?${queryParams.toString()}`
+        `${BASE_URL}/homent?${queryParams.toString()}`
       );
 
       if (response.ok) {
@@ -108,13 +139,21 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
     }
 
     // ensure each property has a `contacted` flag
-    setProperties(
-      (data || []).map((p) => ({ ...p, contacted: !!p.contacted }))
-    );
+    const processedData = (data || []).map((p) => ({ ...p, contacted: !!p.contacted }));
+
+    if (append) {
+      setProperties(prev => [...prev, ...processedData]);
+      // Check if we got less than pageSize results, indicating no more data
+      setHasMore(processedData.length === 20);
+    } else {
+      setProperties(processedData);
+      setHasMore(processedData.length === 20);
+    }
   } catch (error) {
     console.error("Error fetching properties:", error);
   } finally {
     setLoading(false);
+    setLoadingMore(false);
   }
 };
 
@@ -133,6 +172,8 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
       city: "",
       search: "",
     });
+    setCurrentPage(0);
+    setHasMore(true);
   };
 
   const formatPrice = (price) => {
@@ -154,7 +195,7 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
             <div className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-blue-600" />
               <span className="text-xl font-bold text-gray-900">
-                EstateHubster
+                Homent
               </span>
             </div>
             <nav className="hidden md:flex space-x-8">
@@ -313,6 +354,21 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
                 setProperties((prev) => prev.map((pp) => pp.id === id ? { ...pp, contacted: true } : pp));
               }} />
             ))}
+          </div>
+        )}
+
+        {/* Loading indicator for infinite scroll */}
+        {loadingMore && (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Loading more properties...</p>
+          </div>
+        )}
+
+        {/* End of results indicator */}
+        {!loading && !loadingMore && !hasMore && properties.length > 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-600">You've reached the end of the list.</p>
           </div>
         )}
       </div>
