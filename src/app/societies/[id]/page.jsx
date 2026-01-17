@@ -1,14 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter  } from "next/navigation";
 import { Building2, MapPin, ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { toast } from 'sonner';
-import SiteHeader from "@/components/SiteHeader";
-import { getSocietyById, deleteSociety } from '@/app/services/society';
+import SiteHeader from "../../components/SiteHeader";
+import { getSocietyById, deleteSociety } from '../../services/society';
 
 export default function SocietyDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [society, setSociety] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -25,7 +25,7 @@ export default function SocietyDetailPage() {
         setSociety(societyData);
       } else {
         toast.error("Society not found");
-        navigate("/societies");
+        navigate.push("/societies");
       }
     } catch (error) {
       console.error("Error fetching society:", error);
@@ -43,7 +43,7 @@ export default function SocietyDetailPage() {
     try {
       await deleteSociety(id);
       toast.success("Society deleted successfully");
-      navigate("/societies");
+      navigate.push("/societies");
     } catch (error) {
       console.error("Error deleting society:", error);
       toast.error("Failed to delete society");
@@ -75,7 +75,7 @@ export default function SocietyDetailPage() {
             <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Society not found</h3>
             <button
-              onClick={() => navigate("/societies")}
+              onClick={() => navigate.push("/societies")}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
               Back to Societies
@@ -94,7 +94,7 @@ export default function SocietyDetailPage() {
         {/* Back Button */}
         <div className="mb-6">
           <button
-            onClick={() => navigate("/societies")}
+            onClick={() => navigate.push("/societies")}
             className="flex items-center text-blue-600 hover:text-blue-700"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -105,7 +105,7 @@ export default function SocietyDetailPage() {
         {/* Action Buttons */}
         <div className="mb-6 flex space-x-4">
           <button
-            onClick={() => navigate(`/societies/${id}/edit`)}
+            onClick={() => navigate.push(`/societies/${id}/edit`)}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
           >
             <Edit className="h-4 w-4 mr-2" />

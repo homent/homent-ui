@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter  } from "next/navigation";
 import {
   Building2,
   MapPin,
@@ -21,9 +21,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { toast } from 'sonner';
-import SocietyMapPicker from '../../../components/SocietyMapPicker';
-import { mapFormToApiBody, mapEditFormToApiBody } from "@/utils/propertyMapper";
-import SocietyDropdown from "@/components/SocietyDropdown";
+import { mapFormToApiBody, mapEditFormToApiBody } from "../../../utils/propertyMapper";
+import SocietyDropdown from "../../components/SocietyDropdown";
 
 export default function PropertyDetailPage({ params }) {
   const [property, setProperty] = useState(null);
@@ -62,7 +61,7 @@ export default function PropertyDetailPage({ params }) {
     amenities: "",
     uploadedFiles: [],
   });
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
@@ -77,7 +76,7 @@ export default function PropertyDetailPage({ params }) {
   const uploadPropertyPhotos = async (propertyId, files) => {
     if (!propertyId || !Array.isArray(files) || files.length === 0) return;
 
-    const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
+    const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
     const formData = new FormData();
 
@@ -105,9 +104,7 @@ export default function PropertyDetailPage({ params }) {
 
   // get signle property by id to view details
  const fetchProperty = async () => {
-    const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
-    console.log("API BASE URL 2:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
-
+    const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
   try {
     setLoading(true);
     let loaded = null;
@@ -277,7 +274,7 @@ export default function PropertyDetailPage({ params }) {
   e.preventDefault();
 
   try {
-    const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
+    const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
     // 🔹 Build payload with only changed fields
     const payload = mapEditFormToApiBody(editForm, property);
@@ -328,7 +325,7 @@ export default function PropertyDetailPage({ params }) {
  const confirmDeleteProperty = async () => {
     if (!property?.id) return;
 
-    const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
+    const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
     try {
       const res = await fetch(
@@ -347,7 +344,7 @@ export default function PropertyDetailPage({ params }) {
         throw new Error(text || "Delete API failed");
       }
       setShowDeleteConfirm(false);
-      navigate("/properties");
+      navigate.push("/properties");
       toast.success("Property deleted successfully");
 
     } catch (err) {
@@ -1285,7 +1282,7 @@ export default function PropertyDetailPage({ params }) {
 }
 
 function CreatePropertyForm() {
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -1321,7 +1318,7 @@ function CreatePropertyForm() {
    const uploadPropertyPhotos = async (propertyId, files) => {
     if (!propertyId || !Array.isArray(files) || files.length === 0) return;
 
-    const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
+    const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
     const formData = new FormData();
 
@@ -1353,7 +1350,7 @@ const handleSubmit = async (e) => {
   try {
     const payload = mapFormToApiBody(form);
     console.log("Submitting payload:", payload);
-    const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;
+    const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     // API call
     const response = await fetch(`${BASE_URL}/homent?userId=1&eventType=ADD_PROPERTY`, {
@@ -1374,7 +1371,7 @@ const handleSubmit = async (e) => {
       if (propertyId && form.uploadedFiles?.length > 0) {
         await uploadPropertyPhotos(propertyId, form.uploadedFiles);
       }
-      navigate(`/properties`);
+      navigate.push(`/properties`);
     } else {
       console.error("API error:", json);
       toast.error(json.error || "Failed to add property");
@@ -1654,7 +1651,7 @@ const handleSubmit = async (e) => {
               )}
             </div>
             <div className="flex justify-end">
-              <button type="button" onClick={() => navigate('/properties')} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
+              <button type="button" onClick={() => navigate.push('/properties')} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
               <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg">{saving ? 'Saving...' : 'Create Property'}</button>
             </div>
           </form>

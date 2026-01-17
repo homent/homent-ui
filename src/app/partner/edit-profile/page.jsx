@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { User, Mail, Phone, Building2 } from "lucide-react";
-import SiteHeader from "@/components/SiteHeader";
+import SiteHeader from "../../components/SiteHeader";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -33,7 +33,7 @@ export default function ProfilePage() {
   const handleSave = () => {
     setLoading(true);
 
-    localStorage.setItem("user_profile", JSON.stringify(profile));
+    // localStorage.setItem("user_profile", JSON.stringify(profile));
 
     setTimeout(() => {
       setLoading(false);

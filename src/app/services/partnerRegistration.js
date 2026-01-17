@@ -1,20 +1,24 @@
-// Partner Registration API Services
-// Contains all API calls for the partner registration flow
-
-const API_BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL + "/homent";
-
+// partnerRegistrationService.js
+// Next.js safe version: avoids import.meta.env and works with SSR
 
 /**
- * API call for Step 1: Basic Details
- * @param {Object} formData - Form data from the registration form
- * @returns {Promise<Object>} - API response with userId
+ * Get API base URL at runtime
+ */
+const getApiBaseUrl = () => {
+  if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
+  }
+  return process.env.NEXT_PUBLIC_API_BASE_URL + "/homent";
+};
+
+/**
+ * Step 1: Basic Details
  */
 export const callBasicDetailsAPI = async (formData) => {
   try {
-    // Format date from YYYY-MM-DD to DD-MM-YYYY
     const formatDate = (dateString) => {
       if (!dateString) return undefined;
-      const [year, month, day] = dateString.split('-');
+      const [year, month, day] = dateString.split("-");
       return `${day}-${month}-${year}`;
     };
 
@@ -34,7 +38,7 @@ export const callBasicDetailsAPI = async (formData) => {
       country: formData.country || undefined,
     };
 
-    const response = await fetch(`${API_BASE_URL}?eventType=ADD_USER_BROKER`, {
+    const response = await fetch(`${getApiBaseUrl()}?eventType=ADD_USER_BROKER`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -54,9 +58,7 @@ export const callBasicDetailsAPI = async (formData) => {
 };
 
 /**
- * API call for Step 2: Work Details
- * @param {Object} formData - Form data from the registration form
- * @returns {Promise<Object>} - API response
+ * Step 2: Work Details
  */
 export const callWorkDetailsAPI = async (formData, userId) => {
   try {
@@ -67,7 +69,7 @@ export const callWorkDetailsAPI = async (formData, userId) => {
       id: userId,
     };
 
-    const response = await fetch(`${API_BASE_URL}?eventType=ADD_BROKER_WORK_DETAIL`, {
+    const response = await fetch(`${getApiBaseUrl()}?eventType=ADD_BROKER_WORK_DETAIL`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -86,10 +88,7 @@ export const callWorkDetailsAPI = async (formData, userId) => {
 };
 
 /**
- * API call for Step 3: Documents Upload
- * @param {Object} formData - Form data containing file objects
- * @param {string} userId - User ID from Step 1
- * @returns {Promise<Object>} - API response
+ * Step 3: Documents Upload
  */
 export const callDocumentsAPI = async (formData, userId) => {
   try {
@@ -111,11 +110,8 @@ export const callDocumentsAPI = async (formData, userId) => {
         formDataObj.append("files", doc.file);
 
         const response = await fetch(
-          `${API_BASE_URL}?eventType=ADD_BROKER_DOCUMENT&docType=${doc.docType}&userId=${userId}`,
-          {
-            method: "PUT",
-            body: formDataObj,
-          }
+          `${getApiBaseUrl()}?eventType=ADD_BROKER_DOCUMENT&docType=${doc.docType}&userId=${userId}`,
+          { method: "PUT", body: formDataObj }
         );
 
         if (!response.ok) {
@@ -133,10 +129,7 @@ export const callDocumentsAPI = async (formData, userId) => {
 };
 
 /**
- * API call for Step 4: Bank Details
- * @param {Object} formData - Form data from the registration form
- * @param {string} userId - User ID from Step 1
- * @returns {Promise<Object>} - API response
+ * Step 4: Bank Details
  */
 export const callBankDetailsAPI = async (formData, userId) => {
   try {
@@ -147,10 +140,10 @@ export const callBankDetailsAPI = async (formData, userId) => {
       ifscNumber: formData.ifscCode || undefined,
       upiId: formData.upiId || undefined,
       userId: userId || undefined,
-      customerType: "BROKER"
+      customerType: "BROKER",
     };
 
-    const response = await fetch(`${API_BASE_URL}?eventType=ADD_BROKER_BANK_DETAIL`, {
+    const response = await fetch(`${getApiBaseUrl()}?eventType=ADD_BROKER_BANK_DETAIL`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

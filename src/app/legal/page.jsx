@@ -12,8 +12,7 @@ import {
 import { toast } from 'sonner';
 import Select from 'react-select'
 import { countries, states, cities } from '../services/constant';
-import SiteHeader from "@/components/SiteHeader";
-
+import SiteHeader from "../components/SiteHeader";
 
 export default function LegalServicesPage() {
   const [selectedService, setSelectedService] = useState(null);

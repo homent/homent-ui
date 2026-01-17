@@ -1,6 +1,9 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   FileText,
@@ -10,9 +13,11 @@ import {
   ShieldCheck,
   Scale,
 } from "lucide-react";
-import SiteHeader from "@/components/SiteHeader";
+import SiteHeader from "../../components/SiteHeader";
 
 export default function PropertyTransferPage() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     sellerName: "",
     buyerName: "",
@@ -63,7 +68,7 @@ export default function PropertyTransferPage() {
     updateFormData("services", updated);
   };
 
-   const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -79,7 +84,6 @@ export default function PropertyTransferPage() {
     setLoading(true);
 
     try {
-      // MOCK DELAY
       await new Promise((res) => setTimeout(res, 1000));
 
       const existing =

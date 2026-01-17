@@ -1,5 +1,6 @@
+"use client";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter  } from "next/navigation";
 import { toast } from 'sonner';
 import { loginWithEmail, storeAuthData } from '../../services/authService';
 
@@ -14,7 +15,7 @@ import { loginWithEmail, storeAuthData } from '../../services/authService';
  */
 
 export default function LoginPage() {
-    const navigate = useNavigate();
+    const navigate = useRouter();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -51,7 +52,7 @@ export default function LoginPage() {
             storeAuthData(data, userInfo, remember);
 
             // Redirect to app home (adjust route as needed)
-            navigate("/", { replace: true });
+            navigate.push("/", { replace: true });
         } catch (err) {
             setError(err.message || "Login failed.");
         } finally {
@@ -118,7 +119,7 @@ export default function LoginPage() {
 
                     <button
                         type="button"
-                        onClick={() => navigate("/forgot-password")}
+                        onClick={() => navigate.push("/forgot-password")}
                         style={styles.linkBtn}
                         disabled={loading}
                     >
@@ -134,7 +135,7 @@ export default function LoginPage() {
                     <span>Don't have an account?</span>
                     <button
                         type="button"
-                        onClick={() => navigate("/register")}
+                        onClick={() => navigate.push("/register")}
                         style={styles.linkBtn}
                         disabled={loading}
                     >

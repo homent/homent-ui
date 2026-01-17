@@ -10,7 +10,7 @@ import {
   Clock,
   AlertCircle,
 } from "lucide-react";
-import SiteHeader from "@/components/SiteHeader";
+import SiteHeader from "../components/SiteHeader";
 
 export default function MoversPage() {
   const [formData, setFormData] = useState({

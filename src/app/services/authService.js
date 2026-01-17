@@ -3,93 +3,99 @@
  * Handles login API calls for partner authentication
  */
 
-const API_BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL + '/homent';
+// ✅ Next.js environment variable access
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL + "/homent";
 
 /**
  * Login with email and password
- * @param {string} email - User email
- * @param {string} password - User password
- * @returns {Promise<Object>} - API response data
  */
 export const loginWithEmail = async (email, password) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}?eventType=USER_BROKER_LOGIN`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userName: email,
-                password: password
-            }),
-        });
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}?eventType=USER_BROKER_LOGIN`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName: email,
+          password,
+        }),
+      }
+    );
 
-        if (!response.ok) {
-            throw new Error('Login failed. Please check your credentials.');
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        throw new Error(error.message || 'Login failed.');
+    if (!response.ok) {
+      throw new Error("Login failed. Please check your credentials.");
     }
+
+    return await response.json();
+  } catch (error) {
+    throw new Error(error.message || "Login failed.");
+  }
 };
 
 /**
  * Login with phone and OTP
- * @param {string} phone - User phone number
- * @param {string} otp - OTP for verification
- * @returns {Promise<Object>} - API response data
  */
 export const loginWithPhone = async (phone, otp) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}?eventType=USER_BROKER_LOGIN`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username: phone,
-                password: "" // Phone login uses OTP, password might be empty
-            }),
-        });
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}?eventType=USER_BROKER_LOGIN`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: phone,
+          password: "",
+        }),
+      }
+    );
 
-        if (!response.ok) {
-            throw new Error('Login failed. Please check your credentials.');
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        throw new Error(error.message || 'Login failed.');
+    if (!response.ok) {
+      throw new Error("Login failed. Please check your credentials.");
     }
+
+    return await response.json();
+  } catch (error) {
+    throw new Error(error.message || "Login failed.");
+  }
 };
 
 /**
- * Store authentication data in storage
- * @param {Object} data - API response data
- * @param {Object} userInfo - Additional user information
- * @param {boolean} remember - Whether to use localStorage (true) or sessionStorage (false)
+ * Store authentication data (CLIENT ONLY)
  */
 export const storeAuthData = (data, userInfo, remember = true) => {
-    const storage = remember ? localStorage : sessionStorage;
+  if (typeof window === "undefined") return;
 
-    storage.setItem("authToken", data.token || data.accessToken || "api-token");
-    storage.setItem("authUser", JSON.stringify({
-        ...userInfo,
-        ...data.user // Include any additional user data from API
-    }));
-    storage.setItem("user_role", "broker"); // Set user as broker
+  const storage = remember ? window.localStorage : window.sessionStorage;
+
+  storage.setItem(
+    "authToken",
+    data.token || data.accessToken || "api-token"
+  );
+
+  storage.setItem(
+    "authUser",
+    JSON.stringify({
+      ...userInfo,
+      ...data.user,
+    })
+  );
+
+  storage.setItem("user_role", "broker");
 };
 
 /**
- * Clear authentication data from storage
+ * Clear authentication data (CLIENT ONLY)
  */
 export const clearAuthData = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("authUser");
-    localStorage.removeItem("user_role");
-    sessionStorage.removeItem("authToken");
-    sessionStorage.removeItem("authUser");
-    sessionStorage.removeItem("user_role");
+  if (typeof window === "undefined") return;
+
+  window.localStorage.removeItem("authToken");
+  window.localStorage.removeItem("authUser");
+  window.localStorage.removeItem("user_role");
+
+  window.sessionStorage.removeItem("authToken");
+  window.sessionStorage.removeItem("authUser");
+  window.sessionStorage.removeItem("user_role");
 };

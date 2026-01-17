@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Building2 } from "lucide-react";
-import SiteHeader from "@/components/SiteHeader";
+import SiteHeader from "../components/SiteHeader";
 
 export default function PropertyTransferList() {
   const [transfers, setTransfers] = useState([]);
 
   useEffect(() => {
     try {
-      const stored = JSON.parse(
-        localStorage.getItem("property_transfers") || "[]"
-      );
-      setTransfers(Array.isArray(stored) ? stored : []);
+      if (typeof window !== "undefined") {
+        const stored = JSON.parse(
+          localStorage.getItem("property_transfers") || "[]"
+        );
+        setTransfers(Array.isArray(stored) ? stored : []);
+      }
     } catch {
       setTransfers([]);
     }
@@ -35,8 +37,8 @@ export default function PropertyTransferList() {
               transfers.map((t) => (
                 <Link
                   key={t.id}
-                  to={`/property-transfer/${t.id}`}
-                  className="block bg-white p-4 rounded shadow-sm hover:shadow-md"
+                  href={`/property-transfer/${t.id}`}
+                  className="block bg-white p-4 rounded shadow-sm hover:shadow-md transition"
                 >
                   <div className="flex justify-between items-center">
                     <div>
@@ -64,8 +66,8 @@ export default function PropertyTransferList() {
                 Record a new property transfer for testing.
               </p>
               <Link
-                to="/property-transfer/create-property-transfer"
-                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg"
+                href="/property-transfer/create-property-transfer"
+                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Create Property Transfer
               </Link>

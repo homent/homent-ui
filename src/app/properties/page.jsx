@@ -1,5 +1,5 @@
 "use client";
-import { useNavigate } from "react-router-dom";
+import { useRouter  } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Building2,
@@ -15,8 +15,8 @@ import {
   Mail,
 } from "lucide-react";
 import { toast } from 'sonner';
-import SiteHeader from "@/components/SiteHeader";
-import { mapApiPropertiesToMock, mapEditFormToApiBody } from "@/utils/propertyMapper";
+import SiteHeader from "../components/SiteHeader";
+import { mapApiPropertiesToMock, mapEditFormToApiBody } from "../../utils/propertyMapper";
 
 
 export default function PropertiesPage() {
@@ -86,8 +86,8 @@ export default function PropertiesPage() {
 
   // Fetch properties from API with applied filters
   const fetchProperties = async (page = 0, append = false) => {
-  const BASE_URL = import.meta.env.NEXT_PUBLIC_API_BASE_URL;;
-console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
+ const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL;
 
   try {
     if (!append) {
@@ -123,7 +123,7 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
         console.log("API Data:", apiData);
         data = mapApiPropertiesToMock(apiData);
 
-        // data = (json?.data || []).map(mapApiPropertyToMock);
+        data = (json?.data || []).map(mapApiPropertyToMock);
         console.log("Fetched properties:", data);
       } else {
         const stored = JSON.parse(
@@ -138,12 +138,11 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
       data = stored || SAMPLE_PROPERTIES;
     }
 
-    // ensure each property has a `contacted` flag
+    
     const processedData = (data || []).map((p) => ({ ...p, contacted: !!p.contacted }));
 
     if (append) {
       setProperties(prev => [...prev, ...processedData]);
-      // Check if we got less than pageSize results, indicating no more data
       setHasMore(processedData.length === 20);
     } else {
       setProperties(processedData);
@@ -377,7 +376,7 @@ console.log("API BASE URL 1:", import.meta.env.NEXT_PUBLIC_API_BASE_URL);
 }
 
 function PropertyCard({ property, onContacted }) {
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [saved, setSaved] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [contactNumber, setContactNumber] = useState("");
@@ -475,16 +474,13 @@ function PropertyCard({ property, onContacted }) {
         return;
       }
 
-      // Mark verified; copy phone to clipboard as action
       if (navigator.clipboard && navigator.clipboard.writeText) {
         const fullNumber = `${contactCountryCode}${contactNumber}`;
         await navigator.clipboard.writeText(fullNumber);
         toast.success("Phone copied to clipboard");
       }
-      // notify parent that this property was contacted
       if (typeof onContacted === 'function') onContacted(property.id);
 
-      // Persist contacted flag and record user contact in local mock storage so it survives reloads
       try {
         const fullNumber = `${contactCountryCode}${contactNumber}`;
         const storedRaw = localStorage.getItem("mock_properties");
@@ -502,13 +498,10 @@ function PropertyCard({ property, onContacted }) {
             localStorage.setItem("mock_properties", JSON.stringify(updated));
           }
         } else {
-          // create a small mock list containing this property with a user_contacts entry
           const newContact = { id: `u_${Date.now()}`, name: contactName || 'Anonymous', phone: `${contactCountryCode}${contactNumber}`, contactedAt: new Date().toISOString() };
           localStorage.setItem("mock_properties", JSON.stringify([{ ...property, contacted: true, user_contacts: [newContact] }]));
         }
       } catch (e) {
-        // ignore localStorage errors
-        // eslint-disable-next-line no-console
         console.warn("Failed to persist contacted flag:", e);
       }
 
@@ -615,7 +608,7 @@ function PropertyCard({ property, onContacted }) {
         {property.photos && property.photos.length > 0 ? (
           // <a href={`/properties/${property.id}`} >
              <div
-              onClick={() => navigate(`/properties/${property.id}`)}
+              onClick={() => navigate.push(`/properties/${property.id}`)}
               className="cursor-pointer block w-full h-full"
             >
             <img
@@ -625,7 +618,7 @@ function PropertyCard({ property, onContacted }) {
             />
             </div>
         ) : (
-          <div onClick={() => navigate(`/properties/${property.id}`)} className="w-full h-full flex items-center justify-center block">
+          <div onClick={() => navigate.push(`/properties/${property.id}`)} className="w-full h-full flex items-center justify-center block">
             <Building2 className="h-12 w-12 text-gray-400" />
           </div>
         )}
@@ -673,7 +666,7 @@ function PropertyCard({ property, onContacted }) {
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
             <div
-              onClick={() => navigate(`/properties/${property.id}`)}
+              onClick={() => navigate.push(`/properties/${property.id}`)}
               className="cursor-pointer"
             >
               <span className="hover:underline">{property?.societyDetail?.societyName || property.title}</span>

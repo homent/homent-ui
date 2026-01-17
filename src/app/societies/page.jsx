@@ -1,5 +1,5 @@
 "use client";
-import { useNavigate } from "react-router-dom";
+import { useRouter  } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Building2,
@@ -11,8 +11,8 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from 'sonner';
-import SiteHeader from "@/components/SiteHeader";
-import { getSocieties, deleteSociety } from '@/app/services/society';
+import SiteHeader from "../components/SiteHeader";
+import { getSocieties, deleteSociety } from '../services/society';
 
 export default function SocietiesPage() {
   const [societies, setSocieties] = useState([]);
@@ -186,7 +186,7 @@ export default function SocietiesPage() {
 }
 
 function SocietyCard({ society, onDelete }) {
-  const navigate = useNavigate();
+  const navigate = useRouter();
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -199,14 +199,14 @@ function SocietyCard({ society, onDelete }) {
         {/* Action Buttons */}
         <div className="absolute top-3 right-3 flex space-x-2">
           <button
-            onClick={() => navigate(`/societies/${society.id}`)}
+            onClick={() => navigate.push(`/societies/${society.id}`)}
             className="p-2 rounded-full bg-white text-gray-600 hover:bg-blue-500 hover:text-white transition-colors"
             title="View"
           >
             <Eye className="h-4 w-4" />
           </button>
           <button
-            onClick={() => navigate(`/societies/${society.id}/edit`)}
+            onClick={() => navigate.push(`/societies/${society.id}/edit`)}
             className="p-2 rounded-full bg-white text-gray-600 hover:bg-green-500 hover:text-white transition-colors"
             title="Edit"
           >

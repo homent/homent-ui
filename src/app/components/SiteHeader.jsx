@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { Menu, User } from "lucide-react";
 
 export default function SiteHeader({ title, Icon }) {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const userRole = localStorage.getItem("user_role") === "broker";
   const menuRef = useRef(null);
+  const [userRole, setUserRole] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUserRole(localStorage.getItem("user_role") === "broker");
+    }
     function onDocClick(e) {
       if (!menuRef.current) return;
       if (!menuRef.current.contains(e.target)) {
@@ -81,7 +84,7 @@ export default function SiteHeader({ title, Icon }) {
                       <ul className="py-1 text-sm text-gray-700">
                         <li>
                           <Link
-                            to="/partner/edit-profile"
+                            href="/partner/edit-profile"
                             onClick={() => setUserMenuOpen(false)}
                             className="block px-4 py-2 hover:bg-gray-50"
                           >
@@ -90,7 +93,7 @@ export default function SiteHeader({ title, Icon }) {
                         </li>
                         <li>
                           <Link
-                            to="/properties"
+                            href="/properties"
                             onClick={() => setUserMenuOpen(false)}
                             className="block px-4 py-2 hover:bg-gray-50"
                           >
@@ -132,7 +135,7 @@ export default function SiteHeader({ title, Icon }) {
                         {pages.map((p) => (
                           <li key={p.to}>
                             <Link
-                              to={p.to}
+                              href={p.to}
                               onClick={() => setOpen(false)}
                               className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
                             >

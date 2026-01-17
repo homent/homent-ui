@@ -1,5 +1,6 @@
+"use client";
 import { useEffect, useState } from "react";
-import { getSocieties } from "@/app/services/society";
+import { getSocieties } from "../services/society";
 
 export default function SocietyDropdown({ onSelect }) {
   const [societies, setSocieties] = useState([]);

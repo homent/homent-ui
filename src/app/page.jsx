@@ -10,7 +10,7 @@ import {
   Scale,
   Home,
 } from "lucide-react";
-import SiteHeader from "@/components/SiteHeader";
+import SiteHeader from "./components/SiteHeader";
 
 export default function HomePage() {
   return (

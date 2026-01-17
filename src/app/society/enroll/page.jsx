@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter  } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { toast } from "sonner";
 import Select from 'react-select'
@@ -9,7 +9,7 @@ import { countries, states, cities, apartmentTypeOptions } from '../../services/
 import { enrollSociety, uploadSocietyFiles } from './../../services/society';
 
 export default function EnrollSocietyPage() {
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     apartmentType: "", // required
@@ -74,7 +74,7 @@ export default function EnrollSocietyPage() {
 
       toast.success("Society enrolled successfully");
       // small delay so user sees toast, then navigate back to properties list
-      setTimeout(() => navigate("/societies"), 700);
+      setTimeout(() => navigate.push("/societies"), 700);
     } catch (err) {
       console.error(err);
       toast.error("Failed to enroll society");
@@ -329,7 +329,7 @@ export default function EnrollSocietyPage() {
             </div>
 
             <div className="flex justify-end">
-              <button type="button" onClick={() => navigate('/societies')} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
+              <button type="button" onClick={() => navigate.push('/societies')} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
               <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg">{saving ? 'Saving...' : 'Enroll Society'}</button>
             </div>
           </form>

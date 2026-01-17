@@ -1,6 +1,5 @@
 "use client";
-
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Building2,
@@ -9,10 +8,10 @@ import {
   Users,
   Calendar,
 } from "lucide-react";
-import SiteHeader from "@/components/SiteHeader";
+import SiteHeader from "../../components/SiteHeader";
 
 export default function CreateAgreementPage() {
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -59,39 +58,49 @@ export default function CreateAgreementPage() {
 
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    if (
-      !form.email ||
-      !form.phone ||
-      !form.agreementDurationMonths ||
-      !form.refundableDeposit ||
-      !form.maintenancePaidBy
-    ) {
-      alert("Please fill all required fields.");
-      setLoading(false);
-      return;
+  if (
+    !form.email ||
+    !form.phone ||
+    !form.agreementDurationMonths ||
+    !form.refundableDeposit ||
+    !form.maintenancePaidBy
+  ) {
+    alert("Please fill all required fields.");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    let stored = [];
+    if (typeof window !== "undefined" && window.localStorage) {
+      stored = JSON.parse(localStorage.getItem("agreements") || "[]");
     }
 
-    try {
-      const stored = JSON.parse(localStorage.getItem("agreements") || "[]");
-      const record = {
-        id: Date.now().toString(),
-        ...form,
-        agreementDurationMonths: Number(form.agreementDurationMonths),
-        refundableDeposit: Number(form.refundableDeposit),
-        createdAt: new Date().toISOString(),
-      };
-      stored.unshift(record);
+    const record = {
+      id: Date.now().toString(),
+      ...form,
+      agreementDurationMonths: Number(form.agreementDurationMonths),
+      refundableDeposit: Number(form.refundableDeposit),
+      createdAt: new Date().toISOString(),
+    };
+
+    stored.unshift(record);
+
+    if (typeof window !== "undefined" && window.localStorage) {
       localStorage.setItem("agreements", JSON.stringify(stored));
-      navigate("/");
-    } catch {
-      alert("Failed to create agreement");
-    } finally {
-      setLoading(false);
     }
-  };
+
+    navigate("/");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to create agreement");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">

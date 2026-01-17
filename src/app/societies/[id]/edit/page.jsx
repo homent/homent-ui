@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useRouter, useParams } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { toast } from "sonner";
 import Select from 'react-select'
-import { countries, states, cities, apartmentTypeOptions } from '@/app/services/constant';
-import { getSocietyById, updateSociety, uploadSocietyFiles } from '@/app/services/society';
+import { countries, states, cities, apartmentTypeOptions } from '../../../services/constant';
+import { getSocietyById, updateSociety, uploadSocietyFiles } from '../../../services/society';
 
 export default function EditSocietyPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
@@ -73,7 +73,7 @@ export default function EditSocietyPage() {
         });
       } else {
         toast.error("Society not found");
-        navigate("/societies");
+        navigate.push("/societies");
       }
     } catch (error) {
       console.error("Error fetching society:", error);
@@ -117,7 +117,7 @@ export default function EditSocietyPage() {
       }
 
       toast.success("Society updated successfully");
-      setTimeout(() => navigate(`/societies/${id}`), 700);
+      setTimeout(() => navigate.push(`/societies/${id}`), 700);
     } catch (err) {
       console.error(err);
       toast.error("Failed to update society");
@@ -381,7 +381,7 @@ export default function EditSocietyPage() {
             </div>
 
             <div className="flex justify-end">
-              <button type="button" onClick={() => navigate(`/societies/${id}`)} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
+              <button type="button" onClick={() => navigate.push(`/societies/${id}`)} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
               <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg">{saving ? 'Saving...' : 'Update Society'}</button>
             </div>
           </form>
