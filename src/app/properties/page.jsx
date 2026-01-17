@@ -122,9 +122,7 @@ export default function PropertiesPage() {
         const apiData = json || [];
         console.log("API Data:", apiData);
         data = mapApiPropertiesToMock(apiData);
-
-        data = (json?.data || []).map(mapApiPropertyToMock);
-        console.log("Fetched properties:", data);
+        console.log("Mapped Properties:", data);
       } else {
         const stored = JSON.parse(
           localStorage.getItem("mock_properties") || "null"
