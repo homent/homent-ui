@@ -71,7 +71,7 @@ export default function RentAgreementsList() {
               <h3 className="text-lg font-bold mb-4">Actions</h3>
               <Link
                 href="/movers/create-agreement"
-                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="block w-full text-center px-4 py-2 bg-orange-custom text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Create Agreement
               </Link>

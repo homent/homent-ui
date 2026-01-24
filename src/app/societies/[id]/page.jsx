@@ -76,7 +76,7 @@ export default function SocietyDetailPage() {
             <h3 className="text-lg font-medium text-gray-900 mb-2">Society not found</h3>
             <button
               onClick={() => navigate.push("/societies")}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              className="px-4 py-2 bg-orange-custom text-white rounded-lg"
             >
               Back to Societies
             </button>

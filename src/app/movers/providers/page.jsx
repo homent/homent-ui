@@ -47,7 +47,7 @@ export default function MoversProvidersList() {
               </p>
               <Link
                 href="/movers"
-                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg"
+                className="block w-full text-center px-4 py-2 bg-orange-custom text-white rounded-lg"
               >
                 Open Quote Form
               </Link>

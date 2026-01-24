@@ -107,7 +107,7 @@ export default function SocietiesPage() {
             </button>
             <a
               href="/society/enroll"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+              className="px-4 py-2 bg-orange-custom text-white rounded-lg"
             >
               Enroll Society
             </a>
@@ -192,9 +192,23 @@ function SocietyCard({ society, onDelete }) {
     <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
       {/* Society Image Placeholder */}
       <div className="relative h-48 bg-gray-200">
+        {society.photos && society.photos.length > 0 ? (
+          // <a href={`/properties/${property.id}`} >
+             <div
+              onClick={() => navigate.push(`/societies/${society.id}/edit`)}
+              className="cursor-pointer block w-full h-full"
+            >
+            <img
+              src={society.photos[0].url}
+              alt={society.title}
+              className="w-full h-full object-cover"
+            />
+            </div>
+        ) : (
         <div className="w-full h-full flex items-center justify-center">
           <Building2 className="h-12 w-12 text-gray-400" />
         </div>
+        )}
 
         {/* Action Buttons */}
         <div className="absolute top-3 right-3 flex space-x-2">

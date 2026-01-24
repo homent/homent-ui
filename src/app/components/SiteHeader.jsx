@@ -7,20 +7,21 @@ import { Menu, User } from "lucide-react";
 export default function SiteHeader({ title, Icon }) {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const menuRef = useRef(null);
   const [userRole, setUserRole] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setUserRole(localStorage.getItem("user_role") === "broker");
     }
-    function onDocClick(e) {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) {
+
+    const onDocClick = (e) => {
+      if (!menuRef.current?.contains(e.target)) {
         setOpen(false);
         setUserMenuOpen(false);
       }
-    }
+    };
+
     document.addEventListener("click", onDocClick);
     return () => document.removeEventListener("click", onDocClick);
   }, []);
@@ -32,7 +33,7 @@ export default function SiteHeader({ title, Icon }) {
 
   const pages = [
     { to: "/", label: "Home" },
-    { to:"/properties/new", label:"Post Your Property"},
+    { to: "/properties/new", label: "Post Your Property" },
     { to: "/properties", label: "Properties" },
     { to: "/property-transfer/create-property-transfer", label: "Create Property Transfer" },
     { to: "/property-transfer", label: "View Property Transfers List" },
@@ -41,40 +42,37 @@ export default function SiteHeader({ title, Icon }) {
     { to: "/movers/create-agreement", label: "Create Rental Agreement" },
     { to: "/agreements/rent", label: "View Rental Agreements User" },
     { to: "/legal", label: "Request Legal Services" },
-  
   ];
 
   return (
     <>
-      <header className="fixed top-0 w-full text-white bg-blue-600 border-b shadow-sm z-50">
+      <header className="fixed top-0 w-full bg-orange-custom border-b shadow-sm z-50 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
+
+            {/* LEFT SECTION */}
             <div className="flex items-center gap-2">
-              {Icon && <Icon className="h-8 w-8 text-white-600" />}
-              <span className="text-xl font-bold text-white-900">
-                Homent
-              </span>
+              {Icon && <Icon className="h-8 w-8" />}
+              <span className="text-xl font-bold">Homent</span>
               {title && (
-                <span className="hidden sm:block text-md text-white-700">
+                <span className="hidden sm:block text-md opacity-90">
                   {title}
                 </span>
               )}
             </div>
 
-            {/* Right Section */}
-            {userRole ? (
-              <div
-                className="flex items-center gap-3 relative"
-                ref={menuRef}
-              >
-                {/* USER DROPDOWN */}
+            {/* RIGHT SECTION */}
+            <div className="flex items-center gap-3 relative" ref={menuRef}>
+
+              {/* USER DROPDOWN (only for broker) */}
+              {userRole && (
                 <div className="relative">
                   <button
                     onClick={() => setUserMenuOpen((s) => !s)}
-                    className="flex items-center gap-2 px-2 py-1 rounded-md hover:text-black hover:bg-gray-100"
+                    className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white hover:text-black"
                   >
-                    <User className="h-5 w-5 text-white-700" />
-                    <span className="hidden sm:block text-md text-white-900">
+                    <User className="h-5 w-5" />
+                    <span className="hidden sm:block text-md">
                       Sandhya
                     </span>
                   </button>
@@ -112,44 +110,11 @@ export default function SiteHeader({ title, Icon }) {
                     </div>
                   )}
                 </div>
+              )}
 
-                {/* MENU BUTTON */}
-                <button
-                  onClick={() => setOpen((s) => !s)}
-                  className="p-2 rounded-md hover:bg-gray-50 hover:text-black flex items-center gap-2"
-                >
-                  <Menu className="h-5 w-5" />
-                  <span className="hidden sm:block text-md text-white-900">
-                    Menu
-                  </span>
-                </button>
-
-                {/* MAIN MENU */}
-                {open && (
-                  <nav className="absolute right-0 top-14 w-64 bg-white border rounded-md shadow-lg z-40">
-                    <div className="p-3">
-                      <div className="text-sm text-gray-600 mb-2">
-                        Navigate
-                      </div>
-                      <ul className="divide-y">
-                        {pages.map((p) => (
-                          <li key={p.to}>
-                            <Link
-                              href={p.to}
-                              onClick={() => setOpen(false)}
-                              className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
-                            >
-                              {p.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </nav>
-                )}
-              </div>
-            ) : (
-              <nav className="flex items-center gap-3">
+              {/* GUEST ACTIONS */}
+              { userRole == false  && (
+                <nav className="flex items-center gap-3">
                 <a
                   href="/"
                   className="text-white-700 hover:text-white-600 transition-colors"
@@ -158,21 +123,60 @@ export default function SiteHeader({ title, Icon }) {
                 </a>
                 <a
                   href="/partner/login"
-                  className="hidden sm:block text-white-700 border border-blue-600 px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
+                  className="hidden sm:block text-white-700 border btn-border-color px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
                 >
                   Login
                 </a>
                 <a
                   href="/partner/register"
-                  className="hidden sm:block text-white border border-blue-600 px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
+                  className="hidden sm:block text-white border btn-border-color px-4 py-2 rounded-lg hover:text-white hover:bg-orange-custom"
                 >
                   Signup Now
                 </a>
               </nav>
-            )}
+              )}
+
+              {/* MENU BUTTON (for ALL users) */}
+              <button
+                onClick={() => setOpen((s) => !s)}
+                className="p-2 rounded-md hover:bg-white hover:text-black flex items-center gap-2"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="hidden sm:block text-md">
+                  Menu
+                </span>
+              </button>
+
+              {/* MAIN MENU */}
+              {open && (
+                <nav className="absolute right-0 top-14 w-64 bg-white border rounded-md shadow-lg z-40">
+                  <div className="p-3">
+                    <div className="text-sm text-gray-600 mb-2">
+                      Navigate
+                    </div>
+
+                    <ul className="divide-y">
+                      {pages.map((p) => (
+                        <li key={p.to}>
+                          <Link
+                            href={p.to}
+                            onClick={() => setOpen(false)}
+                            className="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                          >
+                            {p.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </nav>
+              )}
+            </div>
           </div>
         </div>
       </header>
+
+      {/* HEADER SPACER */}
       <div className="h-16" />
     </>
   );

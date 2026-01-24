@@ -14,7 +14,7 @@ import SiteHeader from "./components/SiteHeader";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen page-background-color">
       {/* Header */}
       <SiteHeader title=" " Icon={Building2} />
       
@@ -42,13 +42,13 @@ export default function HomePage() {
               </a> */}
               {/* <a
                 href="/partner/register"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-orange-custom text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Become Partner
               </a> */}
               {/* <a
                 href="/partner/login"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-orange-custom text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Login
               </a>
@@ -60,17 +60,17 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 heading-property">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl md:text-6xl font-bold properties-text-color mb-6">
             Your Complete
-            <span className="text-white"> Property Solution</span>
+            <span className=""> Property Solution</span>
           </h1>
-          <p className="text-xl text-white mb-8 max-w-3xl mx-auto">
+          <p className="text-xl properties-text-color mb-8 max-w-3xl mx-auto">
             Buy, sell, rent properties with ease. Get legal support and moving services all in one place.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {/* <a
               href="/properties"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="bg-orange-custom text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors"
             >
               Browse Properties
             </a> */}
@@ -85,9 +85,9 @@ export default function HomePage() {
       </section>
 
       {/* Services Grid */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 page-background-color">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center properties-text-color mb-12">
             Complete Property Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -144,7 +144,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-orange-custom text-white py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -152,13 +152,13 @@ export default function HomePage() {
                 <Building2 className="h-6 w-6" />
                 <span className="text-lg font-bold">Homent</span>
               </div>
-              <p className="text-gray-400">
+              <p className="font-semibold">
                 Your trusted partner for all property needs in India.
               </p>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Services</h3>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2">
                 {/* <li>
                   <a href="/properties" className="hover:text-white">
                     Properties
@@ -178,7 +178,7 @@ export default function HomePage() {
             </div>
             <div>
               <h3 className="font-semibold mb-4">Partners</h3>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 font-semibold">
                 <li>
                   <a href="/partner/register" className="hover:text-white">
                     Become Partner
@@ -193,18 +193,18 @@ export default function HomePage() {
             </div>
             <div>
               <h3 className="font-semibold mb-4">Get in touch</h3>
-              <p className="text-gray-400">
+              <p className="">
                 Email: support@Homent.com
                 <br />
                 Phone: +91 92420 08535
               </p>
             </div>
           </div>
-          <div className="mt-8 border-t border-gray-800 pt-8 text-left text-gray-400">
+          <div className="mt-8 border-t btn-border-color-white pt-8 text-left">
             <h3 className="font-semibold mb-4 text-white">About Homent (Homent.in): </h3>
             Homent is a comprehensive property management and services platform designed to simplify real estate transactions and related services in India. Our mission is to provide a seamless experience for property buyers, sellers, renters, and service providers by integrating various property-related services into one easy-to-use platform.
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t btn-border-color-white mt-8 pt-8 text-center">
             <p>&copy; 2025 Homent. All rights reserved.</p>
           </div>
         </div>
@@ -216,12 +216,12 @@ export default function HomePage() {
 function ServiceCard({ icon, title, description, link }) {
   return (
     <a href={link} className="group">
-      <div className="bg-gray-50 p-6 rounded-xl hover:bg-blue-50 transition-colors group-hover:shadow-lg">
-        <div className="text-blue-600 mb-4 group-hover:text-blue-700">
+      <div className="propert-card-color p-6 rounded-xl transition-colors group-hover:shadow-lg">
+        <div className="properties-text-color mb-4 group-hover:properties-text-color">
           {icon}
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <h3 className="text-xl properties-text-color font-semibold mb-2">{title}</h3>
+        <p className="font-semibold properties-text-color">{description}</p>
       </div>
     </a>
   );

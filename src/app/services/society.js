@@ -38,6 +38,7 @@ export async function deleteSociety(societyId, userId = 1) {
   const url = `${BASE_URL}/homent?eventType=DELETE_SOCIETY&userId=${userId}&societyId=${societyId}`;
   const response = await fetch(url, {
     method: 'POST',
+    body: {},
   });
   if (!response.ok) throw new Error("Failed to delete society");
   return response.json();

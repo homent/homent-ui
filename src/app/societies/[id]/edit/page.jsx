@@ -382,7 +382,7 @@ export default function EditSocietyPage() {
 
             <div className="flex justify-end">
               <button type="button" onClick={() => navigate.push(`/societies/${id}`)} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
-              <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg">{saving ? 'Saving...' : 'Update Society'}</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-orange-custom text-white rounded-lg">{saving ? 'Saving...' : 'Update Society'}</button>
             </div>
           </form>
         </div>

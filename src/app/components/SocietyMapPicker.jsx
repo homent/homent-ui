@@ -36,7 +36,7 @@ export default function SocietyMapPicker({ onSelect, initial }) {
         <button
           type="button"
           onClick={() => setShowMap(!showMap)}
-          className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+          className="w-full px-3 py-2 bg-orange-custom text-white rounded-lg text-sm hover:bg-blue-700"
         >
           {showMap ? "Hide Map" : "Show Map"}
         </button>

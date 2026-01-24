@@ -482,7 +482,7 @@ export default function PropertyDetailPage({ params }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 w-full text-white bg-blue-600 border-b shadow-sm z-50">
+      <header className="fixed top-0 w-full text-white bg-orange-custom border-b shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Building2 className="h-8 w-8 text-white" />
@@ -546,13 +546,14 @@ export default function PropertyDetailPage({ params }) {
                           >
                             <ChevronRight className="h-6 w-6 text-gray-900" />
                         </button>
+                        {isBroker && (
                         <button
                         onClick={openEdit}
                         className="p-3 rounded-full bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 transition-colors"
                         title="Edit property"
                       >
                         Edit
-                      </button>
+                      </button>)}
                       {/* <button
                         onClick={handleDeleteProperty}
                         className="p-3 rounded-full bg-white text-red-600 hover:bg-red-50 border border-red-200 transition-colors"
@@ -587,10 +588,10 @@ export default function PropertyDetailPage({ params }) {
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  <h1 className="text-3xl font-bold properties-text-color mb-2">
                     {property.societyDetail?.societyName || property.title}
                   </h1>
-                  <div className="flex items-center text-gray-600">
+                  <div className="flex items-center properties-text-color">
                     <MapPin className="h-5 w-5 mr-2" />
                     <span>
                       {property.societyDetail?.city}, {property.societyDetail?.state}
@@ -613,9 +614,11 @@ export default function PropertyDetailPage({ params }) {
                     >
                       <Share2 className="h-6 w-6" />
                     </button>
+                    {isBroker && (
+                      <div>
                     <button
                       onClick={openEdit}
-                      className="bg-blue-600 text-white p-3 rounded-full border border-gray-200 transition-colors"
+                      className="bg-orange-custom text-white p-3 rounded-full border border-gray-200 transition-colors"
                       title="Edit property"
                     >
                       Edit
@@ -627,15 +630,17 @@ export default function PropertyDetailPage({ params }) {
                       >
                         Delete
                     </button>
+                    </div>
+                    )}
                     {/* Delete Confirmation Modal */}
                     {showDeleteConfirm && (
                       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
                         <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                          <h2 className="text-lg font-semibold properties-text-color mb-2">
                             Delete Property
                           </h2>
 
-                          <p className="text-gray-600 mb-6">
+                          <p className="properties-text-color mb-6">
                             Are you sure you want to delete this property?  
                             {/* This action <span className="font-semibold text-red-600">cannot be undone</span>. */}
                           </p>
@@ -643,7 +648,7 @@ export default function PropertyDetailPage({ params }) {
                           <div className="flex justify-end gap-3">
                             <button
                               onClick={() => setShowDeleteConfirm(false)}
-                              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100"
+                              className="px-4 py-2 rounded-md border btn-border-color properties-text-color hover:bg-gray-100"
                             >
                               Cancel
                             </button>
@@ -678,11 +683,11 @@ export default function PropertyDetailPage({ params }) {
                 </span>
               </div>
 
-              <div className="text-3xl font-bold text-blue-600 mb-2">
+              <div className="text-3xl font-bold properties-text-color mb-2">
                 {formatPrice(property?.price)}
               </div>
               {property.builtArea && (
-                <p className="text-gray-600">
+                <p className="properties-text-color">
                   ₹{Math.round(property.price / property.builtArea)} / sqft
                 </p>
               )}
@@ -694,18 +699,18 @@ export default function PropertyDetailPage({ params }) {
                 <div className="flex items-start md:items-center justify-center min-h-screen px-4 py-8">
                   <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Edit Property</h3>
-                    <button onClick={() => setIsEditing(false)} className="text-gray-500">Close</button>
+                    <h3 className="text-lg properties-text-color font-semibold">Edit Property</h3>
+                    <button onClick={() => setIsEditing(false)} className="properties-text-color">Close</button>
                   </div>
                   <form onSubmit={handleEditSubmit} className="space-y-4">
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Society Name</label>
+                      <label className="block text-sm font-medium properties-text-color">Society Name</label>
                       <input disabled value={editForm.societyName} onChange={(e) => updateEdit("societyName", e.target.value)} className="w-full px-3 py-2 border rounded-lg" required />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Title</label>
+                      <label className="block text-sm font-medium properties-text-color">Title</label>
                       <input value={editForm.title} onChange={(e) => updateEdit("title", e.target.value)} className="w-full px-3 py-2 border rounded-lg" required />
                     </div>
 
@@ -900,7 +905,7 @@ export default function PropertyDetailPage({ params }) {
                     </div>
                     <div className="flex justify-end">
                       <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
-                      <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg">Save changes</button>
+                      <button type="submit" className="px-4 py-2 bg-orange-custom text-white rounded-lg">Save changes</button>
                     </div>
                   </form>
                 </div>
@@ -910,42 +915,42 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Property Specifications */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold properties-text-color mb-4">
                 Key Specifications
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {property.bedroom && (
                   <div className="text-center">
-                    <Bed className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <p className="text-gray-600 text-sm">Bedrooms</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <Bed className="h-8 w-8 properties-text-color mx-auto mb-2" />
+                    <p className="properties-text-color text-sm">Bedrooms</p>
+                    <p className="text-lg font-semibold properties-text-color">
                       {property.bedroom}
                     </p>
                   </div>
                 )}
                 {property.bathroom && (
                   <div className="text-center">
-                    <Bath className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <p className="text-gray-600 text-sm">Bathrooms</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <Bath className="h-8 w-8 properties-text-color mx-auto mb-2" />
+                    <p className="properties-text-color text-sm">Bathrooms</p>
+                    <p className="text-lg font-semibold properties-text-color">
                       {property.bathroom}
                     </p>
                   </div>
                 )}
                 {property.parking >= 0 && (
                   <div className="text-center">
-                    <Car className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <p className="text-gray-600 text-sm">Parking</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <Car className="h-8 w-8 properties-text-color mx-auto mb-2" />
+                    <p className="properties-text-color text-sm">Parking</p>
+                    <p className="text-lg font-semibold properties-text-color">
                       {property.parking}
                     </p>
                   </div>
                 )}
                 {property.builtArea && (
                   <div className="text-center">
-                    <Building2 className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <p className="text-gray-600 text-sm">Built Area</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <Building2 className="h-8 w-8 properties-text-color mx-auto mb-2" />
+                    <p className="properties-text-color text-sm">Built Area</p>
+                    <p className="text-lg font-semibold properties-text-color">
                       {Math.round(property.builtArea)} sqft
                     </p>
                   </div>
@@ -955,48 +960,48 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Description */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold properties-text-color mb-4">
                 About this Property
               </h2>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="properties-text-color leading-relaxed">
                 {property.description}
               </p>
             </div>
 
             {isBroker && (
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Users Contacted</h3>
+                <h3 className="text-lg font-bold properties-text-color mb-4">Users Contacted</h3>
                 {userContacts && userContacts.length > 0 ? (
                   <div className="max-h-64 overflow-y-auto space-y-3 pr-2" aria-live="polite">
                     {userContacts.map((u) => (
                       <div key={u.id} className="flex items-center justify-between p-3 border rounded">
                         <div>
-                          <div className="text-gray-900 font-medium">{u.name}</div>
-                          <div className="text-sm text-gray-600">{new Date(u.contactedAt).toLocaleString()}</div>
+                          <div className="properties-text-color font-medium">{u.name}</div>
+                          <div className="text-sm properties-text-color">{new Date(u.contactedAt).toLocaleString()}</div>
                         </div>
                         <div className="text-right">
-                          <div className="text-gray-900 font-medium">{u.phone}</div>
+                          <div className="properties-text-color font-medium">{u.phone}</div>
                           <a href={`tel:${u.phone.replace(/\s+/g, '')}`} className="text-sm text-blue-600 hover:underline mt-1 inline-block">Call</a>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-600">No user contacts yet.</p>
+                  <p className="text-sm properties-text-color">No user contacts yet.</p>
                 )}
               </div>
             )}
-            {!isBroker && (
+            {/* {!isBroker && (
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Users Contacted</h3>
-                <p className="text-sm text-gray-600">Contact details are visible only to verified brokers.</p>
+                <h3 className="text-lg font-bold properties-text-color mb-4">Users Contacted</h3>
+                <p className="text-sm properties-text-color">Contact details are visible only to verified brokers.</p>
               </div>
-            )}
+            )} */}
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                <h2 className="text-xl font-bold properties-text-color mb-4">
                   Amenities
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1018,54 +1023,54 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Additional Details */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+              <h2 className="text-xl font-bold properties-text-color mb-4">
                 Additional Details
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {property.furnishStatus && (
                   <div>
-                    <p className="text-gray-600 text-sm mb-1">Furnishing</p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="properties-text-color text-sm mb-1">Furnishing</p>
+                    <p className="properties-text-color font-medium">
                       {property.furnishStatus.replace("_", " ")}
                     </p>
                   </div>
                 )}
                 {property.societyDetail?.buildYear && (
                   <div>
-                    <p className="text-gray-600 text-sm mb-1">Year Built</p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="properties-text-color text-sm mb-1">Year Built</p>
+                    <p className="properties-text-color font-medium">
                       {property.societyDetail.buildYear}
                     </p>
                   </div>
                 )}
                 {property.floor && (
                   <div>
-                    <p className="text-gray-600 text-sm mb-1">Floor Number</p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="properties-text-color text-sm mb-1">Floor Number</p>
+                    <p className="properties-text-color font-medium">
                       {property.floor}
                     </p>
                   </div>
                 )}
                 {property.societyDetail?.totalFloor && (
                   <div>
-                    <p className="text-gray-600 text-sm mb-1">Total Floors</p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="properties-text-color text-sm mb-1">Total Floors</p>
+                    <p className="properties-text-color font-medium">
                       {property.societyDetail.totalFloor}
                     </p>
                   </div>
                 )}
                 {property.carpetArea && (
                   <div>
-                    <p className="text-gray-600 text-sm mb-1">Carpet Area</p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="properties-text-color text-sm mb-1">Carpet Area</p>
+                    <p className="properties-text-color font-medium">
                       {Math.round(property.carpetArea)} sqft
                     </p>
                   </div>
                 )}
                 {property.builtArea && (
                   <div>
-                    <p className="text-gray-600 text-sm mb-1">Plot Area</p>
-                    <p className="text-gray-900 font-medium">
+                    <p className="properties-text-color text-sm mb-1">Plot Area</p>
+                    <p className="properties-text-color font-medium">
                       {Math.round(property.builtArea)} sqft
                     </p>
                   </div>
@@ -1075,15 +1080,15 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Services (Packers & Movers, Create Agreement) */}
             <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Services</h2>
+              <h2 className="text-xl font-bold properties-text-color mb-4">Services</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <a
                   href="/movers"
                   className="block p-4 border rounded hover:shadow transition-colors bg-white"
                   title="Packers & Movers"
                 >
-                  <div className="text-lg font-medium">Packers & Movers</div>
-                  <div className="text-sm text-gray-600">Get quotes and contact verified movers for shifting assistance.</div>
+                  <div className="text-lg font-medium properties-text-color">Packers & Movers</div>
+                  <div className="text-sm properties-text-color">Get quotes and contact verified movers for shifting assistance.</div>
                 </a>
 
                 <a
@@ -1091,8 +1096,8 @@ export default function PropertyDetailPage({ params }) {
                   className="block p-4 border rounded hover:shadow transition-colors bg-white"
                   title="Create Agreement"
                 >
-                  <div className="text-lg font-medium">Create Agreement</div>
-                  <div className="text-sm text-gray-600">Generate a rental agreement online.</div>
+                  <div className="text-lg font-medium properties-text-color">Create Agreement</div>
+                  <div className="text-sm properties-text-color">Generate a rental agreement online.</div>
                 </a>
               </div>
             </div>
@@ -1102,11 +1107,11 @@ export default function PropertyDetailPage({ params }) {
           <div className="lg:col-span-1">
             {/* Contact Card */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6 sticky top-8">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
+              <h3 className="text-lg font-bold properties-text-color mb-4">
                 Contact Agent
               </h3>
               <div className="space-y-3 mb-6">
-                <button className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <button className="w-full flex items-center justify-center px-4 py-3 bg-orange-custom text-white rounded-lg hover:bg-gray-700 transition-colors">
                   <Phone className="h-5 w-5 mr-2" />
                   Call Agent
                 </button>
@@ -1119,7 +1124,7 @@ export default function PropertyDetailPage({ params }) {
               {/* Inquiry Form Toggle */}
               <button
                 onClick={() => setShowInquiryForm(!showInquiryForm)}
-                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="w-full px-4 py-3 border btn-border-color btn-text-color-secondary text-white rounded-lg transition-colors"
               >
                 Send Inquiry
               </button>
@@ -1200,7 +1205,7 @@ export default function PropertyDetailPage({ params }) {
                     </div>
                     <button
                       type="submit"
-                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="w-full px-4 py-2 bg-orange-custom text-white rounded-lg transition-colors"
                     >
                       Send Inquiry
                     </button>
@@ -1211,23 +1216,23 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Quick Facts */}
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
+              <h3 className="text-lg font-bold properties-text-color mb-4">
                 Quick Facts
               </h3>
-              <div className="space-y-4 text-sm">
+              <div className="space-y-4 text-sm properties-text-color">
                 <div>
-                  <p className="text-gray-600 mb-1">Address</p>
-                  <p className="text-gray-900">{property.societyDetail?.address}</p>
+                  <p className="mb-1">Address</p>
+                  <p className="">{property.societyDetail?.address}</p>
                 </div>
                 <div>
-                  <p className="text-gray-600 mb-1">Location</p>
-                  <p className="text-gray-900">
+                  <p className="mb-1">Location</p>
+                  <p className="">
                     {property.societyDetail?.city}, {property.societyDetail?.state}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-600 mb-1">Posted On</p>
-                  <p className="text-gray-900">
+                <div className="properties-text-color">
+                  <p className="mb-1">Posted On</p>
+                  <p className="">
                     {property.created_at
                       ? new Date(property.created_at).toLocaleDateString()
                       : property.createdAt
@@ -1235,20 +1240,22 @@ export default function PropertyDetailPage({ params }) {
                         : "-"}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-600 mb-1">Property Type</p>
-                  <p className="text-gray-900">{property.dealType}</p>
+                <div className="properties-text-color">
+                  <p className="mb-1">Property Type</p>
+                  <p className="properties-text-color">{property.dealType}</p>
                 </div>
-                <div>
-                  <p className="text-gray-600 mb-1">Possession Status</p>
-                  <p className="text-gray-900">
+                <div className="properties-text-color">
+                  <p className="mb-1">Possession Status</p>
+                  <p className="">
                     {property.possessionStatus?.replace("_", " ")}
                   </p>
                 </div>
               </div>
             </div>
             {/* Activity On This Property */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+            { 
+              isBroker && (
+              <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Activity On This Property</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
@@ -1274,6 +1281,7 @@ export default function PropertyDetailPage({ params }) {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>
@@ -1386,7 +1394,7 @@ const handleSubmit = async (e) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 w-full text-white bg-blue-600 border-b shadow-sm z-50">
+      <header className="fixed top-0 w-full text-white bg-orange-custom border-b shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Building2 className="h-8 w-8 text-white-600" />
@@ -1652,7 +1660,7 @@ const handleSubmit = async (e) => {
             </div>
             <div className="flex justify-end">
               <button type="button" onClick={() => navigate.push('/properties')} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
-              <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg">{saving ? 'Saving...' : 'Create Property'}</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-orange-custom text-white rounded-lg">{saving ? 'Saving...' : 'Create Property'}</button>
             </div>
           </form>
         </div>

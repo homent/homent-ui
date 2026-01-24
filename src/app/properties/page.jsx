@@ -39,7 +39,7 @@ export default function PropertiesPage() {
       amenities: ["Gym", "Swimming Pool"],
     },
   ];
-
+  const [isBroker, setIsBroker] = useState(false);
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
@@ -62,6 +62,11 @@ export default function PropertiesPage() {
     setHasMore(true);
     fetchProperties(0, false);
   }, [filters]);
+
+    useEffect(() => {
+    const role = localStorage.getItem("user_role");
+    setIsBroker(role === "broker");
+  }, []);
 
   // Infinite scroll handler
   useEffect(() => {
@@ -204,7 +209,7 @@ export default function PropertiesPage() {
               </a>
               <a
                 href="/partner/register"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className="bg-orange-custom text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Become Partner
               </a>
@@ -219,42 +224,46 @@ export default function PropertiesPage() {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <div className="relative">
+              <div className="relative search-properties">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input
                   type="text"
                   placeholder="Search properties by title, location..."
                   value={filters.search}
                   onChange={(e) => updateFilter("search", e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border btn-border-color rounded-lg focus:btn-border-color"
                 />
               </div>
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex items-center px-4 py-2 border properties-text-color border-gray-300 rounded-lg hover:bg-gray-50"
             >
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </button>
-            <a
-              href="/properties/new"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-            >
-              Add Property
-            </a>
-            <a
-              href="/societies"
-              className="px-4 py-2 bg-green-600 text-white rounded-lg"
-            >
-              View Societies
-            </a>
-            <a
-              href="/society/enroll"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-            >
-              Enroll Society
-            </a>
+             {isBroker && (
+              <div  className="mt-2">
+                <a
+                  href="/properties/new"
+                  className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
+                >
+                  Add Property
+                </a>
+                <a
+                  href="/societies"
+                  className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
+                >
+                  View Societies
+                </a>
+                <a
+                  href="/society/enroll"
+                  className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
+                >
+                  Enroll Society
+                </a>
+            </div> 
+          )}
           </div>
 
           {showFilters && (
@@ -334,15 +343,15 @@ export default function PropertiesPage() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">Loading properties...</p>
+            <p className="mt-2 properties-text-color">Loading properties...</p>
           </div>
         ) : properties.length === 0 ? (
           <div className="text-center py-12">
             <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium properties-text-color mb-2">
               No properties found
             </h3>
-            <p className="text-gray-600">Try adjusting your search criteria</p>
+            <p className="properties-text-color">Try adjusting your search criteria</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -624,7 +633,7 @@ function PropertyCard({ property, onContacted }) {
         {/* Listing Type Badge */}
         <div className="absolute top-3 left-3">
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${getListingTypeBadge(property.listing_type)}`}
+            className={`px-2 py-1 properties-text-color rounded-full text-xs font-medium ${getListingTypeBadge(property.listing_type)}`}
           >
             {property.listing_type?.charAt(0).toUpperCase() +
               property.listing_type?.slice(1)}
@@ -662,7 +671,7 @@ function PropertyCard({ property, onContacted }) {
       {/* Property Details */}
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+          <h3 className="text-lg font-semibold properties-text-color line-clamp-2">
             <div
               onClick={() => navigate.push(`/properties/${property.id}`)}
               className="cursor-pointer"
@@ -672,23 +681,23 @@ function PropertyCard({ property, onContacted }) {
             {/* <a href={`/properties/${property.id}`} className="hover:underline">{property.title}</a> */}
           </h3>
           <div className="text-right">
-            <div className="text-xl font-bold text-blue-600">
+            <div className="text-xl font-bold properties-text-color">
               {formatPrice(property.price)}
             </div>
             {property.built_area && (
-              <div className="text-sm text-gray-500">
+              <div className="text-sm properties-text-color">
                 ₹{Math.round(property.price / property.built_area)} / sqft
               </div>
             )}
           </div>
         </div>
 
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        <p className="properties-text-color font-weight-600 text-sm mb-3 line-clamp-2">
           {property.description}
         </p>
 
         {/* Property Specs */}
-        <div className="flex items-center space-x-4 mb-3 text-sm text-gray-600">
+        <div className="flex items-center space-x-4 mb-3 text-sm properties-text-color font-weight-600">
           {property.bedrooms && (
             <div className="flex items-center">
               <Bed className="h-4 w-4 mr-1" />
@@ -713,7 +722,7 @@ function PropertyCard({ property, onContacted }) {
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-sm text-gray-600 mb-4">
+        <div className="flex items-center text-sm properties-text-color font-weight-600 mb-4">
           <MapPin className="h-4 w-4 mr-1" />
           <span className="line-clamp-1">
             {property.city}, {property.state}
@@ -765,14 +774,14 @@ function PropertyCard({ property, onContacted }) {
         <div className="flex space-x-2">
           <button
             onClick={handleContact}
-            className="flex-1 flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+            className="flex-1 flex items-center justify-center px-3 py-2 btn-bg-color text-white rounded-lg hover:btn-bg-color transition-colors text-sm"
           >
             <Phone className="h-4 w-4 mr-1" />
             Contact Owner
           </button>
           <button
             onClick={handleInquiry}
-            className="flex-1 flex items-center justify-center px-3 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
+            className="flex-1 flex items-center justify-center px-3 py-2 border btn-border-color btn-text-color-secondary rounded-lg hover:bg-blue-50 transition-colors text-sm"
           >
             <Mail className="h-4 w-4 mr-1" />
             Inquire
@@ -783,9 +792,9 @@ function PropertyCard({ property, onContacted }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={closeContactModal} />
           <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
-            <h3 className="text-lg font-semibold mb-4">Contact Owner</h3>
+            <h3 className="text-lg font-semibold properties-text-color mb-4">Contact Owner</h3>
 
-            <label className="block text-sm text-gray-700 mb-2">Your name</label>
+            <label className="block text-sm properties-text-color mb-2">Your name</label>
             <input
               type="text"
               value={contactName}
@@ -794,7 +803,7 @@ function PropertyCard({ property, onContacted }) {
               placeholder="Enter your name"
             />
 
-            <label className="block text-sm text-gray-700 mb-2">Phone number</label>
+            <label className="block text-sm properties-text-color mb-2">Phone number</label>
             <div className="flex mb-3">
               <input
                 id={`wa-cc-${property.id}`}
@@ -825,11 +834,11 @@ function PropertyCard({ property, onContacted }) {
                   <div className={`w-11 h-6 rounded-full transition-colors ${contactUseWhatsApp ? 'bg-green-500' : 'bg-gray-200'}`} />
                   <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform ${contactUseWhatsApp ? 'translate-x-5' : ''}`} />
                 </div>
-                <span className="ml-3 text-sm text-gray-700">Send OTP via WhatsApp</span>
+                <span className="ml-3 text-sm properties-text-color">Send OTP via WhatsApp</span>
               </label>
             </div>
 
-            <label className="block text-sm text-gray-700 mb-2">OTP</label>
+            <label className="block text-sm properties-text-color mb-2">OTP</label>
             <input
               type="text"
               value={otpEntered}
@@ -842,13 +851,13 @@ function PropertyCard({ property, onContacted }) {
               <button
                 onClick={submitContact}
                 disabled={contactLoading}
-                className={`px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 ${contactLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                className={`px-4 py-2 bg-orange-custom text-white rounded hover:bg-orange-custom ${contactLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {otpSent ? (contactLoading ? 'Verifying...' : 'Submit') : 'Send OTP'}
               </button>
-              <button onClick={closeContactModal} className="px-4 py-2 text-sm text-gray-600">Cancel</button>
+              <button onClick={closeContactModal} className="px-4 py-2 text-sm properties-text-color">Cancel</button>
             </div>
-            <p className="text-xs text-gray-500 mt-3">We will send a one-time code to verify your phone.</p>
+            <p className="text-xs properties-text-color mt-3">We will send a one-time code to verify your phone.</p>
           </div>
         </div>
       )}
@@ -912,7 +921,7 @@ function PropertyCard({ property, onContacted }) {
               </div>
 
               <div className="flex items-center justify-between">
-                <button type="submit" disabled={inquiryLoading} className={`px-4 py-2 bg-blue-600 text-white rounded ${inquiryLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                <button type="submit" disabled={inquiryLoading} className={`px-4 py-2 bg-orange-custom text-white rounded ${inquiryLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
                   {inquiryLoading ? 'Sending...' : 'Send Inquiry'}
                 </button>
                 <button type="button" onClick={closeInquiryForm} className="px-4 py-2 text-sm text-gray-600">Cancel</button>

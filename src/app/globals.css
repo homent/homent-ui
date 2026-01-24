@@ -8,5 +8,40 @@
   }
 }
 .heading-property {
-  background-image: url(https://propertyhub.net/wp-content/uploads/2023/10/property-hub-invest.jpg);
+  /* background-image: url(https://propertyhub.net/wp-content/uploads/2023/10/property-hub-invest.jpg); */
+}
+.btn-bg-color {
+  background-color: #bd8a2a;;
+}
+
+.btn-border-color {
+  border-color: #bd8a2a;
+}
+.btn-border-color-white {
+  border-color: #ffffff;
+}
+.btn-text-color-secondary {
+  color: #bd8a2a;
+}
+
+.bg-orange-custom {
+  background-color: #b98321;
+}
+
+.properties-text-color {
+  color: #603c14;
+   /* #5e4824; */
+}
+.page-background-color {
+  background-color: #f6f2f3;
+} 
+.search-properties {
+  .input:focus {
+    border-color: #bd8a2a;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(189, 138, 42, 0.25);
+  }
+}
+.propert-card-color {
+    background-color: #fdfbfc;
 }

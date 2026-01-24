@@ -85,7 +85,7 @@ export default function EnrollSocietyPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 w-full text-white bg-blue-600 border-b shadow-sm z-50">
+      <header className="fixed top-0 w-full text-white bg-orange-custom border-b shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Building2 className="h-8 w-8 text-white-600" />
@@ -330,7 +330,7 @@ export default function EnrollSocietyPage() {
 
             <div className="flex justify-end">
               <button type="button" onClick={() => navigate.push('/societies')} className="px-4 py-2 mr-2 border rounded-lg">Cancel</button>
-              <button type="submit" disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded-lg">{saving ? 'Saving...' : 'Enroll Society'}</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 bg-orange-custom text-white rounded-lg">{saving ? 'Saving...' : 'Enroll Society'}</button>
             </div>
           </form>
         </div>

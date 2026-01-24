@@ -67,7 +67,7 @@ export default function PropertyTransferList() {
               </p>
               <Link
                 href="/property-transfer/create-property-transfer"
-                className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="block w-full text-center px-4 py-2 bg-orange-custom text-white rounded-lg hover:bg-blue-700 transition"
               >
                 Create Property Transfer
               </Link>

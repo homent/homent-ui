@@ -311,7 +311,7 @@ export default function LegalServicesPage() {
                 <button
                   type="submit"
                   disabled={loading || !selectedService}
-                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="w-full px-4 py-3 bg-orange-custom text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
                 >
                   {loading ? "Submitting..." : "Book Consultation"}
                 </button>
@@ -331,7 +331,7 @@ export default function LegalServicesPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white mb-4">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-orange-custom text-white mb-4">
                 <span className="text-lg font-bold">1</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -342,7 +342,7 @@ export default function LegalServicesPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white mb-4">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-orange-custom text-white mb-4">
                 <span className="text-lg font-bold">2</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -353,7 +353,7 @@ export default function LegalServicesPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white mb-4">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-orange-custom text-white mb-4">
                 <span className="text-lg font-bold">3</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -364,7 +364,7 @@ export default function LegalServicesPage() {
               </p>
             </div>
             <div className="text-center">
-              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-blue-600 text-white mb-4">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-md bg-orange-custom text-white mb-4">
                 <span className="text-lg font-bold">4</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">

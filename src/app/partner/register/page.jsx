@@ -226,7 +226,7 @@ export default function PartnerRegisterPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 w-full text-white bg-blue-600 border-b shadow-sm z-50">
+      <header className="fixed top-0 w-full text-white bg-orange-custom border-b shadow-sm z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
@@ -262,7 +262,7 @@ export default function PartnerRegisterPage() {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                     step <= currentStep
-                      ? "bg-blue-600 text-white"
+                      ? "bg-orange-custom text-white"
                       : "bg-gray-200 text-gray-600"
                   }`}
                 >
@@ -271,7 +271,7 @@ export default function PartnerRegisterPage() {
                 {step < 4 && (
                   <div
                     className={`flex-1 h-1 mx-2 ${
-                      step < currentStep ? "bg-blue-600" : "bg-gray-200"
+                      step < currentStep ? "bg-orange-custom" : "bg-gray-200"
                     }`}
                   />
                 )}
@@ -350,7 +350,7 @@ export default function PartnerRegisterPage() {
               <button
                 onClick={nextStep}
                 disabled={loading}
-                className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center px-6 py-2 bg-orange-custom text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? "Processing..." : "Next"}
                 {!loading && <ArrowRight className="w-4 h-4 ml-2" />}
@@ -625,7 +625,7 @@ function WorkDetailsStep({
             <button
               type="button"
               onClick={addArea}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-orange-custom text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Add
             </button>
@@ -708,7 +708,7 @@ function WorkDetailsStep({
             <button
               type="button"
               onClick={addLanguage}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-orange-custom text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Add
             </button>
