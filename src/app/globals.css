@@ -8,7 +8,17 @@
   }
 }
 .heading-property {
-  /* background-image: url(https://propertyhub.net/wp-content/uploads/2023/10/property-hub-invest.jpg); */
+  /* background-image: url("/images/real-estate-hero.jpg");
+  background-position: center;
+  background-size: cover;
+
+   background:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+    url("/images/real-estate-hero.png") center/cover no-repeat; */
+  background-image: url("/images/real-estate-hero.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat
 }
 .btn-bg-color {
   background-color: #bd8a2a;;
