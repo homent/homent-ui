@@ -60,12 +60,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 heading-property">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold properties-text-color mb-6">
-            Your Complete
-            <span className=""> Property Solution</span>
+          {/* properties-text-color */}
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            Your Trusted Real Estate Partner
+            {/* <span className=""> Property Solution</span> */}
           </h1>
-          <p className="text-xl properties-text-color mb-8 max-w-3xl mx-auto">
-            Buy, sell, rent properties with ease. Get legal support and moving services all in one place.
+          <p className="text-xl mb-8 max-w-3xl font-bold text-white mx-auto">
+            Apartments Rent & Resale
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {/* <a
@@ -92,13 +93,15 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <ServiceCard
-              icon={<Home className="h-8 w-8" />}
+              // icon={<Home className="h-8 w-8" />}
+              iconSrc="/images/for-sale.png"
               title="Post Your Property"
               description="Post your property for sale or rent"
               link="/properties/new"
             />
             <ServiceCard
-              icon={<Home className="h-8 w-8" />}
+              // icon={<Home className="h-8 w-8" />}
+              iconSrc="/images/Rent.png"
               title="Property Listings"
               description="Browse thousands of properties for rent, sale, and new projects"
               link="/properties"
@@ -111,18 +114,21 @@ export default function HomePage() {
             /> */}
             <ServiceCard
               icon={<FileText className="h-8 w-8" />}
+              // iconSrc="/images/homent-logo.png"
               title="Rental Agreement"
               description="Create legally compliant rental agreements online"
               link="/movers/create-agreement"
             />
             <ServiceCard
               icon={<Scale className="h-8 w-8" />}
+              // iconSrc="real-estate-hero.png"
               title="Legal Services"
               description="Connect with legal consultants for property documentation"
               link="/legal"
             />
             <ServiceCard
               icon={<Truck className="h-8 w-8" />}
+              // iconSrc="/images/listing.svg"
               title="Packers & Movers"
               description="Professional moving services with real-time tracking"
               link="/movers"
@@ -194,18 +200,18 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4">Get in touch</h3>
               <p className="">
-                Email: support@Homent.com
+                Email: homentproperty@gmail.com
                 <br />
-                Phone: +91 92420 08535
+                Phone: +91 70285 44009
               </p>
             </div>
           </div>
           <div className="mt-8 border-t btn-border-color-white pt-8 text-left">
-            <h3 className="font-semibold mb-4 text-white">About Homent (Homent.in): </h3>
-            Homent is a comprehensive property management and services platform designed to simplify real estate transactions and related services in India. Our mission is to provide a seamless experience for property buyers, sellers, renters, and service providers by integrating various property-related services into one easy-to-use platform.
-          </div>
+            <h3 className="font-semibold mb-4 text-white">About Us: </h3>
+              Welcome to Homent Properties, your trusted partner in the real estate market. We specialise in rental, resale, and property management services, 
+              ensuring seamless experience for both property owners and tenants. With our professional and personalized approach, we help clients find the perfect home or investment property while maximizing the value and returns of their real estate assets.          </div>
           <div className="border-t btn-border-color-white mt-8 pt-8 text-center">
-            <p>&copy; 2025 Homent. All rights reserved.</p>
+            <p>&copy; Homent Properties. All Rights Reserved.</p>
           </div>
         </div>
       </footer>
@@ -213,15 +219,30 @@ export default function HomePage() {
   );
 }
 
-function ServiceCard({ icon, title, description, link }) {
+function ServiceCard({ icon, iconSrc, title, description, link }) {
   return (
     <a href={link} className="group">
       <div className="propert-card-color p-6 rounded-xl transition-colors group-hover:shadow-lg">
+        {iconSrc && (
+        <img
+        // size="64x64"
+          src={iconSrc}
+          alt={title}
+          className="h-20 w-auto mb-4"
+          width="100" height="100"
+        />
+        )}
         <div className="properties-text-color mb-4 group-hover:properties-text-color">
           {icon}
         </div>
         <h3 className="text-xl properties-text-color font-semibold mb-2">{title}</h3>
         <p className="font-semibold properties-text-color">{description}</p>
+        <button
+          className="flex-1 mt-4 flex items-center justify-center px-3 py-2 btn-bg-color text-white rounded-lg hover:btn-bg-color transition-colors text-sm"
+        >
+          {/* <Phone className="h-4 w-4 mr-1" /> */}
+          Learn More
+        </button>
       </div>
     </a>
   );

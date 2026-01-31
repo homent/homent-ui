@@ -52,13 +52,19 @@ export default function SiteHeader({ title, Icon }) {
 
             {/* LEFT SECTION */}
             <div className="flex items-center gap-2">
-              {Icon && <Icon className="h-8 w-8" />}
+              {Icon && 
+              // <Icon className="h-8 w-8" />
+              <img src="/images/logo_homent.png" color="white" alt="Homent Logo" className="h-8 w-8" />
+              
+              }
               <span className="text-xl font-bold">Homent</span>
               {title && (
                 <span className="hidden sm:block text-md opacity-90">
                   {title}
                 </span>
               )}
+              {/* <img src="/images/homent_logo.svg" alt="Logo" width="100" height="100"> */}
+              {/* </img> */}
             </div>
 
             {/* RIGHT SECTION */}
@@ -117,19 +123,19 @@ export default function SiteHeader({ title, Icon }) {
                 <nav className="flex items-center gap-3">
                 <a
                   href="/"
-                  className="text-white-700 hover:text-white-600 transition-colors"
+                  className="hidden sm:block text-white-700 border btn-border-color px-4 py-2 rounded-lg hover:text-black hover:bg-white"
                 >
                   Home
                 </a>
                 <a
                   href="/partner/login"
-                  className="hidden sm:block text-white-700 border btn-border-color px-4 py-2 rounded-lg hover:text-white hover:bg-blue-700"
+                  className="hidden sm:block text-white-700 border btn-border-color px-4 py-2 rounded-lg hover:text-black hover:bg-white"
                 >
                   Login
                 </a>
                 <a
                   href="/partner/register"
-                  className="hidden sm:block text-white border btn-border-color px-4 py-2 rounded-lg hover:text-white hover:bg-orange-custom"
+                  className="hidden sm:block text-white border btn-border-color px-4 py-2 rounded-lg hover:text-black hover:bg-white"
                 >
                   Signup Now
                 </a>

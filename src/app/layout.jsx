@@ -2,8 +2,8 @@ import Providers from "./providers";
 import "./globals.css";
 
 export const metadata = {
-  title: "HomeFlux",
-  description: "HomeFlux application",
+  title: "Homent",
+  description: "Homent properties",
 };
 
 export default function RootLayout({ children }) {
