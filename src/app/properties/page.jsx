@@ -356,8 +356,8 @@ export default function PropertiesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} onContacted={(id) => {
-                setProperties((prev) => prev.map((pp) => pp.id === id ? { ...pp, contacted: true } : pp));
+              <PropertyCard key={property.id} property={property} onContacted={(id, ownerDetails) => {
+                setProperties((prev) => prev.map((pp) => pp.id === id ? { ...pp, contacted: true, ownerDetails } : pp));
               }} />
             ))}
           </div>
@@ -394,6 +394,22 @@ function PropertyCard({ property, onContacted }) {
   const [contactLoading, setContactLoading] = useState(false);
   const [contactUseWhatsApp, setContactUseWhatsApp] = useState(false);
   const [contactCountryCode, setContactCountryCode] = useState("+91");
+  const [otpError, setOtpError] = useState("");
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
+
+
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((t) => t - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
 
   const handleSave = async () => {
     setSaved(!saved);
@@ -412,21 +428,100 @@ function PropertyCard({ property, onContacted }) {
     }
   };
 
-  const handleContact = () => {
-    // Open contact modal and prefill phone if available
-    const rawPhone = property.phone || property.contact_phone || property.agent?.phone || property.agent_phone || "";
-    let phone = rawPhone;
-    // If phone includes an international code like +91..., split it
-    if (phone && phone.startsWith("+")) {
-      const codeMatch = phone.match(/^\+\d{1,4}/);
-      if (codeMatch) {
-        setContactCountryCode(codeMatch[0]);
-        phone = phone.slice(codeMatch[0].length).trim().replace(/[^0-9]/g, "");
-      }
-    } else {
-      setContactCountryCode("+91");
+  const sendOtp = async () => {
+    if (!contactNumber) {
+      toast.error("Please enter phone number");
+      return;
     }
-    setContactNumber(phone);
+
+    if (!isValidPhone(contactNumber)) {
+      toast.error("Enter a valid 10-digit mobile number");
+      return;
+    }
+
+    setContactLoading(true);
+    setOtpError("");
+    setOtpVerified(false);
+
+    try {
+      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+      const response = await fetch(
+        `${BASE_URL}/homent?eventType=ADD_CUSTOMER_ENQUIRY`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: contactName || "Anonymous",
+            phone: contactNumber,
+            enquiryType: property.listing_type || "Rent",
+            propertyId: property.id,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result?.message || "Failed to send OTP");
+        return;
+      }
+
+      toast.success("OTP sent successfully");
+      setOtpSent(true);
+      setResendTimer(30); // ⏳ 30 sec cooldown
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong while sending OTP");
+    } finally {
+      setContactLoading(false);
+    }
+  };
+
+
+
+  const handleContact = async () => {
+    const userDetailsRaw = localStorage.getItem("userLoginDetails");
+    const userDetails = JSON.parse(userDetailsRaw);
+    console.log("userDetails", userDetails);
+    /* ---------------- LOGGED-IN USER ---------------- */
+    if (userDetails?.id) {
+      try {
+        const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+        const response = await fetch(
+          `${BASE_URL}/homent?eventType=ADD_CUSTOMER_SERVICE_ENQUIRY`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: userDetails?.name,
+              email: userDetails?.email,
+              phone: userDetails?.phone,
+              enquiryType: property.listing_type || " ",
+              propertyId: property.id,
+              userId: userDetails?.id,
+            }),
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result?.message || "Failed to contact owner");
+          return;
+        }
+        toast.success("Owner contacted successfully");
+        onContacted?.(property.id, { ownerName: result?.name, ownerMobile: result?.mobile });
+        setContactModalOpen(false);
+        return;
+      } catch (error) {
+        console.error(error);
+        toast.error("Something went wrong");
+        return;
+      }
+    }
+    setContactCountryCode("+91");
     setContactName("");
     setOtpEntered("");
     setOtpSent(false);
@@ -434,6 +529,7 @@ function PropertyCard({ property, onContacted }) {
     setContactUseWhatsApp(false);
     setContactModalOpen(true);
   };
+
 
   const closeContactModal = () => {
     setContactModalOpen(false);
@@ -445,78 +541,109 @@ function PropertyCard({ property, onContacted }) {
     setContactLoading(false);
     setContactUseWhatsApp(false);
     setContactCountryCode("+91");
+    setOtpError("");
+    setOtpVerified(false);
   };
 
-  const submitContact = async () => {
-    // Single-button flow: if OTP not sent -> send OTP, else verify
-    if (!contactNumber) {
-      toast.error("Please enter a phone number");
+  const verifyOtp = async () => {
+    if (!otpEntered) {
+      setOtpError("Please enter OTP");
       return;
     }
 
-    if (!otpSent) {
-      // "send" OTP (client-side simulation)
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      setSentOtp(code);
-      setOtpSent(true);
-      const fullNumber = `${contactCountryCode}${contactNumber}`;
-      if (contactUseWhatsApp) {
-        toast.success(`OTP sent via WhatsApp to ${fullNumber}`);
-        // eslint-disable-next-line no-console
-        console.debug("Sent OTP via WhatsApp:", code, fullNumber);
-      } else {
-        toast.success(`OTP sent to ${fullNumber}`);
-        // eslint-disable-next-line no-console
-        console.debug("Sent OTP via SMS:", code, fullNumber);
-      }
-      // In a real app, call backend to send SMS/WhatsApp here
-      return;
-    }
-
-    // Verify OTP
     setContactLoading(true);
+    setOtpError("");
+
     try {
-      if (otpEntered !== sentOtp) {
-        toast.error("Invalid OTP");
+      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const res = await fetch(
+        `${BASE_URL}/homent?eventType=CUSTOMER_OTP_VERIFY&mobile=${contactNumber}&otp=${otpEntered}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: contactName || " ",
+            phone: contactNumber,
+            enquiryType: property.listing_type || "Rent",
+            propertyId: property.id,
+          }),
+        }
+      );
+      const json = await res.json();
+      if (!res.ok || json?.status === 400) {
+        setOtpError("Invalid OTP. Please try again.");
+        setOtpVerified(false);
+        return;
+      }
+      localStorage.setItem(
+        "userLoginDetails",
+        JSON.stringify(json)
+      );
+
+      toast.success("Phone verified successfully");
+      handleContact();
+      setOtpVerified(true);
+      onContacted?.(property.id);
+      closeContactModal();
+    } catch (e) {
+      console.error(e);
+      setOtpError("Invalid OTP. Please try again.");
+      setOtpVerified(false);
+    } finally {
+      setContactLoading(false);
+    }
+  };
+
+
+  const submitContact = async () => {
+    if (!contactNumber) {
+      toast.error("Please enter phone number");
+      return;
+    }
+
+    if (!otpEntered) {
+      toast.error("Please enter OTP");
+      return;
+    }
+
+    setContactLoading(true);
+
+    try {
+      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+      const response = await fetch(
+        `${BASE_URL}/homent?eventType=CUSTOMER_OTP_VERIFY&mobile=${contactNumber}&otp=${otpEntered}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: contactName || "Anonymous",
+            // email: "na@yopmail.com",
+            phone: contactNumber,
+            // msg: "Interested in property",
+            enquiryType: property.listing_type || "Rent",
+            propertyId: property.id,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result?.message || "OTP verification failed");
         return;
       }
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        const fullNumber = `${contactCountryCode}${contactNumber}`;
-        await navigator.clipboard.writeText(fullNumber);
-        toast.success("Phone copied to clipboard");
-      }
-      if (typeof onContacted === 'function') onContacted(property.id);
+      toast.success("Phone verified successfully");
 
-      try {
-        const fullNumber = `${contactCountryCode}${contactNumber}`;
-        const storedRaw = localStorage.getItem("mock_properties");
-        if (storedRaw) {
-          const stored = JSON.parse(storedRaw);
-          if (Array.isArray(stored)) {
-            const updated = stored.map((p) => {
-              if (p.id === property.id) {
-                const prevContacts = Array.isArray(p.user_contacts) ? p.user_contacts : [];
-                const newContact = { id: `u_${Date.now()}`, name: contactName || 'Anonymous', phone: fullNumber, contactedAt: new Date().toISOString() };
-                return { ...p, contacted: true, user_contacts: [...prevContacts, newContact] };
-              }
-              return p;
-            });
-            localStorage.setItem("mock_properties", JSON.stringify(updated));
-          }
-        } else {
-          const newContact = { id: `u_${Date.now()}`, name: contactName || 'Anonymous', phone: `${contactCountryCode}${contactNumber}`, contactedAt: new Date().toISOString() };
-          localStorage.setItem("mock_properties", JSON.stringify([{ ...property, contacted: true, user_contacts: [newContact] }]));
-        }
-      } catch (e) {
-        console.warn("Failed to persist contacted flag:", e);
+      if (typeof onContacted === "function") {
+        onContacted(property.id);
       }
 
-      toast.success("Phone verified — you can now contact the owner");
       closeContactModal();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to verify phone");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
     } finally {
       setContactLoading(false);
     }
@@ -527,9 +654,12 @@ function PropertyCard({ property, onContacted }) {
   const [inquiryCountryCode, setInquiryCountryCode] = useState("+91");
   const [inquiryLoading, setInquiryLoading] = useState(false);
 
-  const handleInquiry = () => {
+  const handleInquiry = async () => {
+    const userDetailsRaw = localStorage.getItem("userLoginDetails");
+    const userDetails = JSON.parse(userDetailsRaw);
+    console.log("userDetails inquery", userDetails);
     // Open inquiry modal and prefill phone if available
-    const raw = property?.phone || property?.contact_phone || property?.agent?.phone || property?.agent_phone || "";
+    const raw = userDetails?.phone || "";
     let phone = raw || "";
     if (phone && phone.startsWith("+")) {
       const m = phone.match(/^\+\d{1,4}/);
@@ -540,7 +670,7 @@ function PropertyCard({ property, onContacted }) {
     } else {
       setInquiryCountryCode("+91");
     }
-    setInquiryData((d) => ({ ...d, phone }));
+    setInquiryData((d) => ({ ...d, phone, name: userDetails?.name || d?.name, id: userDetails?.id  }));
     setShowInquiryForm(true);
   };
 
@@ -553,40 +683,46 @@ function PropertyCard({ property, onContacted }) {
 
   const handleInquirySubmit = async (e) => {
     e && e.preventDefault && e.preventDefault();
+    console.log("Submitting inquiry:", inquiryData);
     // minimal validation
     if (!inquiryData.name || !inquiryData.email || !inquiryData.phone) {
       toast.error("Name, email and phone are required");
       return;
     }
     setInquiryLoading(true);
-    try {
-      // Send inquiry to backend update latter
-      const resp = await fetch(`/api/property-inquiries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertyId: property.id,
-          name: inquiryData.name,
-          email: inquiryData.email,
-          phone: `${inquiryCountryCode}${inquiryData.phone}`,
-          message: inquiryData.message,
-          inquiryType: "general",
-        }),
-      });
+      try {
+        const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-      const json = await resp.json();
-      if (resp.ok) {
-        toast.success(json.message || "Inquiry sent successfully");
+        const response = await fetch(
+          `${BASE_URL}/homent?eventType=ADD_CUSTOMER_SERVICE_ENQUIRY`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: inquiryData.name,
+              email: inquiryData.email,
+              phone: inquiryData.phone,
+              message: inquiryData.message,
+              enquiryType: "enquiry",
+              propertyId: property.id,
+              userId: inquiryData?.id,
+            }),
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result?.message || "Failed to send inquiry");
+        }
+        toast.success("Inquiry sent successfully");
         closeInquiryForm();
-      } else {
-        toast.error(json.error || "Failed to send inquiry");
+      } catch (error) {
+        console.error("Inquiry submit error:", error);
+        toast.error("Failed to send inquiry");
+      } finally {
+        setInquiryLoading(false);
       }
-    } catch (err) {
-      console.error("Inquiry submit error:", err);
-      toast.error("Failed to send inquiry");
-    } finally {
-      setInquiryLoading(false);
-    }
   };
 
   const formatPrice = (price) => {
@@ -750,15 +886,73 @@ function PropertyCard({ property, onContacted }) {
           </div>
         )}
         {/* user */}
-        {(localStorage.getItem("user_role") != "broker" && property.contacted) && (
-          <div className="mb-4">
-              <div className="flex flex-wrap gap-1 items-center">
-                  <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                    Contacted Owner
-                  </span>
+        {localStorage.getItem("user_role") !== "broker" && property.contacted && (
+          <div className="mb-4 rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-4 shadow-sm">
+            
+            {/* Status */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="flex items-center gap-1 px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                Contacted Owner
+              </span>
+            </div>
+
+            {/* Owner Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-white rounded-full shadow">
+                  <svg
+                    className="w-4 h-4 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Owner Name</p>
+                  <p className="font-medium text-gray-800">
+                    {property.ownerDetails?.ownerName || "N/A"}
+                  </p>
+                </div>
               </div>
+
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-white rounded-full shadow">
+                  <svg
+                    className="w-4 h-4 text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Owner Mobile</p>
+                  <p className="font-medium text-gray-800">
+                    {property.ownerDetails?.ownerMobile || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+            </div>
           </div>
-        )} 
+        )}
+
+
         {/* broker */}
         {  localStorage.getItem("user_role") === "broker" && (
           <div className="mb-4">
@@ -773,6 +967,7 @@ function PropertyCard({ property, onContacted }) {
         {/* Action Buttons */}
         <div className="flex space-x-2">
           <button
+            disabled={property.contacted}
             onClick={handleContact}
             className="flex-1 flex items-center justify-center px-3 py-2 btn-bg-color text-white rounded-lg hover:btn-bg-color transition-colors text-sm"
           >
@@ -814,6 +1009,7 @@ function PropertyCard({ property, onContacted }) {
               />
               <input
                 type="tel"
+                disabled={otpSent}
                 value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)}
                 className="flex-1 px-3 py-2 border rounded-r-md"
@@ -842,19 +1038,43 @@ function PropertyCard({ property, onContacted }) {
             <input
               type="text"
               value={otpEntered}
-              onChange={(e) => setOtpEntered(e.target.value)}
-              className="w-full px-3 py-2 border rounded mb-3"
-              placeholder={otpSent ? "Enter received OTP" : "(Press Submit to send OTP)"}
+              onChange={(e) => {
+                setOtpEntered(e.target.value);
+                setOtpError("");
+              }}
+              className={`w-full px-3 py-2 border rounded mb-1 ${
+                otpError ? "border-red-500" : ""
+              }`}
+              placeholder={otpSent ? "Enter received OTP" : "Click Send OTP"}
             />
+            {otpError && (
+              <p className="text-sm text-red-600 mb-2">{otpError}</p>
+            )}
 
             <div className="flex items-center justify-between">
+
               <button
-                onClick={submitContact}
+                onClick={otpSent ? verifyOtp : sendOtp}
                 disabled={contactLoading}
-                className={`px-4 py-2 bg-orange-custom text-white rounded hover:bg-orange-custom ${contactLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+               className={`btn-bg-color text-white px-4 py-2 rounded
+                  ${(!isValidPhone(contactNumber)) ? "opacity-60 cursor-not-allowed" : ""}
+                `}
               >
-                {otpSent ? (contactLoading ? 'Verifying...' : 'Submit') : 'Send OTP'}
+                {otpSent
+                  ? contactLoading ? "Verifying..." : "Submit"
+                  : contactLoading ? "Sending..." : "Send OTP"}
               </button>
+              {otpSent && (
+                <button
+                  onClick={sendOtp}
+                  disabled={resendTimer > 0}
+                  className="text-sm properties-text-color disabled:text-gray-400"
+                >
+                  {resendTimer > 0
+                    ? `Resend OTP in ${resendTimer}s`
+                    : "Resend OTP"}
+                </button>
+              )}
               <button onClick={closeContactModal} className="px-4 py-2 text-sm properties-text-color">Cancel</button>
             </div>
             <p className="text-xs properties-text-color mt-3">We will send a one-time code to verify your phone.</p>

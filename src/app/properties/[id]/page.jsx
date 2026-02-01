@@ -585,7 +585,7 @@ export default function PropertyDetailPage({ params }) {
             </div>
 
             {/* Property Title and Info */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h1 className="text-3xl font-bold properties-text-color mb-2">
@@ -914,7 +914,7 @@ export default function PropertyDetailPage({ params }) {
             )}
 
             {/* Property Specifications */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold properties-text-color mb-4">
                 Key Specifications
               </h2>
@@ -959,7 +959,7 @@ export default function PropertyDetailPage({ params }) {
             </div>
 
             {/* Description */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold properties-text-color mb-4">
                 About this Property
               </h2>
@@ -969,7 +969,7 @@ export default function PropertyDetailPage({ params }) {
             </div>
 
             {isBroker && (
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
                 <h3 className="text-lg font-bold properties-text-color mb-4">Users Contacted</h3>
                 {userContacts && userContacts.length > 0 ? (
                   <div className="max-h-64 overflow-y-auto space-y-3 pr-2" aria-live="polite">
@@ -1000,7 +1000,7 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+              <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
                 <h2 className="text-xl font-bold properties-text-color mb-4">
                   Amenities
                 </h2>
@@ -1022,7 +1022,7 @@ export default function PropertyDetailPage({ params }) {
             )}
 
             {/* Additional Details */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
               <h2 className="text-xl font-bold properties-text-color mb-4">
                 Additional Details
               </h2>
@@ -1079,28 +1079,56 @@ export default function PropertyDetailPage({ params }) {
             </div>
 
             {/* Services (Packers & Movers, Create Agreement) */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-              <h2 className="text-xl font-bold properties-text-color mb-4">Services</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <a
-                  href="/movers"
-                  className="block p-4 border rounded hover:shadow transition-colors bg-white"
-                  title="Packers & Movers"
-                >
-                  <div className="text-lg font-medium properties-text-color">Packers & Movers</div>
-                  <div className="text-sm properties-text-color">Get quotes and contact verified movers for shifting assistance.</div>
-                </a>
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mt-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                  Services
+                </h2>
 
-                <a
-                  href="/movers/create-agreement"
-                  className="block p-4 border rounded hover:shadow transition-colors bg-white"
-                  title="Create Agreement"
-                >
-                  <div className="text-lg font-medium properties-text-color">Create Agreement</div>
-                  <div className="text-sm properties-text-color">Generate a rental agreement online.</div>
-                </a>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* Packers & Movers */}
+                  <a
+                    href="/movers"
+                    className="group flex gap-4 items-start rounded-xl border border-gray-200 bg-white p-5
+                              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  >
+                    {/* Icon circle */}
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-amber-600 text-xl transition-transform duration-300 group-hover:scale-110">
+                      🚚
+                    </div>
+
+                    <div>
+                      <div className="text-base font-semibold text-gray-800 mb-1">
+                        Packers & Movers
+                      </div>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        Get quotes and connect with verified movers for safe and easy shifting.
+                      </div>
+                    </div>
+                  </a>
+
+                  {/* Create Agreement */}
+                  <a
+                    href="/movers/create-agreement"
+                    className="group flex gap-4 items-start rounded-xl border border-gray-200 bg-white p-5
+                              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 text-xl transition-transform duration-300 group-hover:scale-110">
+                      📄
+                    </div>
+
+                    <div>
+                      <div className="text-base font-semibold text-gray-800 mb-1">
+                        Create Agreement
+                      </div>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        Create a legally valid rental agreement online in just a few minutes.
+                      </div>
+                    </div>
+                  </a>
+
+                </div>
               </div>
-            </div>
           </div>
 
           {/* Sidebar */}
@@ -1111,7 +1139,7 @@ export default function PropertyDetailPage({ params }) {
                 Contact Agent
               </h3>
               <div className="space-y-3 mb-6">
-                <button className="w-full flex items-center justify-center px-4 py-3 bg-orange-custom text-white rounded-lg hover:bg-gray-700 transition-colors">
+                <button className="w-full flex items-center justify-center px-4 py-3 bg-orange-custom text-white rounded-lg transition-colors">
                   <Phone className="h-5 w-5 mr-2" />
                   Call Agent
                 </button>

@@ -66,7 +66,7 @@ export default function HomePage() {
             {/* <span className=""> Property Solution</span> */}
           </h1>
           <p className="text-xl mb-8 max-w-3xl font-bold text-white mx-auto">
-            Apartments Rent & Resale
+            Simplifying Property Rentals, Resales, and Management in India
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {/* <a
