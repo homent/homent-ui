@@ -106,6 +106,12 @@ export default function HomePage() {
               description="Browse thousands of properties for rent, sale, and new projects"
               link="/properties"
             />
+            <ServiceCard
+              iconSrc="/images/Rent.png"
+              title="Property Management"
+              description="Manage your rental properties efficiently"
+              link="/rental-property-management"
+            /> 
             {/* <ServiceCard
               icon={<Calculator className="h-8 w-8" />}
               title="Cost Calculator"

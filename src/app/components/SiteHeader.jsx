@@ -35,6 +35,7 @@ export default function SiteHeader({ title, Icon }) {
     { to: "/", label: "Home" },
     { to: "/properties/new", label: "Post Your Property" },
     { to: "/properties", label: "Properties" },
+    { to: "/rental-property-management", label: "Property Management" },
     { to: "/property-transfer/create-property-transfer", label: "Create Property Transfer" },
     { to: "/property-transfer", label: "View Property Transfers List" },
     { to: "/movers", label: "Request Packers & Movers" },
