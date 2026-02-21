@@ -8,24 +8,25 @@
 export const mapFormToApiBody = (form) => ({
   dealType: form.listing_type?.toUpperCase() || "RESALE", // RENT or RESALE
   visibilityType: form.visibilityType || "ALL", // ALL, ORG, ME
-  title: form.title || "test",
+  title: form.title || "",
   societyName: form.societyName,
-  description: form.description || "test description",
+  description: form.description || "",
   status: "Active",
   type: form.property_type?.toUpperCase() || "FLAT", // FLAT, VILLA, etc
   price: form.price ? Number(form.price) : 0,
   builtArea: form.built_area ? Number(form.built_area) : 0,
-  carpetArea: form.carpet_area || "200",
-  unit: form.unit || "2",
+  carpetArea: form.carpet_area || "",
+  unit: form.unit || "",
   bedroom: form.bedrooms ? Number(form.bedrooms) : 0,
   bathroom: form.bathrooms ? Number(form.bathrooms) : 0,
-  furnishStatus: form.furnishing || "test",
+  furnishStatus: form.furnishing || "",
   parking: form.parking ? form.parking.toString() : "0",
   floor: form.floor_number ? form.floor_number.toString() : "0",
-  facing: form.facing || "North",
+  facing: form.facing || "",
   possessionStatus: form.possession_status || "Ready to Move",
-  flatNo: form.flat_no || "202",
-  wing: form.wing || "A",
+  flatNo: form.flat_no || "",
+  wing: form.wing || "",
+  phone: form.phone || "",
   societyId: form.societyId, // society ID
 });
 

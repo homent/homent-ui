@@ -10,9 +10,10 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from 'sonner';
-import Select from 'react-select'
-import { countries, states, cities } from '../services/constant';
+import Select from 'react-select';
 import SiteHeader from "../components/SiteHeader";
+import { submitEnquiry } from '../services/apiService';
+import { states, cities } from '../services/constant';
 
 export default function LegalServicesPage() {
   const [selectedService, setSelectedService] = useState(null);
@@ -86,57 +87,71 @@ export default function LegalServicesPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/legal-services", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const data = {
+        name: formData.userName,
+        email: formData.userEmail,
+        phone: formData.userPhone,
+        countryCode: "+91",
+        city: formData.city,
+        state: formData.state,
+        consultationMode: formData.consultationMode.toUpperCase(),
+        note: formData.remarks,
+      };
 
-      if (response.ok) {
-        setSuccess(true);
-        setFormData({
-          userName: "",
-          userEmail: "",
-          userPhone: "",
-          serviceType: "document_review",
-          consultationMode: "call",
-          city: "",
-          state: "Maharashtra",
-          remarks: "",
-        });
-        setTimeout(() => setSuccess(false), 5000);
-      } else {
-        toast.error("Failed to submit request. Please try again.");
-      }
+      await submitEnquiry('ADD_LEGAL_ENQUIRY', data);
+
+      setSuccess(true);
+      setFormData({
+        userName: "",
+        userEmail: "",
+        userPhone: "",
+        serviceType: "document_review",
+        consultationMode: "call",
+        city: "",
+        state: "Maharashtra",
+        remarks: "",
+      });
     } catch (error) {
       console.error("Error submitting request:", error);
-      toast.error("Error submitting request. Please try again.");
+      toast.error("Failed to submit request. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
       <SiteHeader Icon={Building2} title="Legal Services" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <Scale className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Legal Services
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Connect with experienced legal consultants for all your property law
-            needs. Expert guidance for documentation, registration, and
-            transfers.
-          </p>
+        <div className="relative text-center mb-20">
+        <div className="absolute inset-0 -z-10 flex justify-center">
+          <div className="h-64 w-64 rounded-full bg-orange-100 blur-3xl opacity-40" />
         </div>
+
+        {/* Icon badge */}
+        <div className="inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-custom text-white mb-6 shadow-lg shadow-orange-200">
+          <Scale className="h-10 w-10" />
+        </div>
+
+        {/* Heading */}
+        <h1 className="text-xl md:text-5xl font-extrabold properties-text-color mb-5 leading-tight">
+          Legal Services
+        </h1>
+
+      {/* Sub text */}
+      <p className="text-lg md:text-xl properties-text-color max-w-3xl mx-auto leading-relaxed">
+        Connect with experienced legal consultants for all your property law
+        needs. Expert guidance for documentation, registration, and
+        transfers.
+      </p>
+
+      </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Services List */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold properties-text-color mb-6">
               Our Services
             </h2>
             <div className="space-y-4">
@@ -151,13 +166,13 @@ export default function LegalServicesPage() {
                     }}
                     className={`cursor-pointer p-6 rounded-lg border-2 transition-all ${
                       selectedService === service.id
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-200 bg-white hover:border-blue-300"
+                        ? "border-orange-custom bg-orange-50"
+                        : "border-gray-200 bg-white hover:border-orange-300"
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
-                        <Icon className="h-8 w-8 text-blue-600 mt-1" />
+                        <Icon className="h-8 w-8 text-orange-custom mt-1" />
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
                             {service.title}
@@ -174,7 +189,7 @@ export default function LegalServicesPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-600">
+                        <p className="text-2xl font-bold text-orange-custom">
                           {service.price}
                         </p>
                       </div>
@@ -188,20 +203,23 @@ export default function LegalServicesPage() {
           {/* Booking Form */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
+              <h3 className="text-xl font-bold properties-text-color mb-6">
                 Book a Consultation
               </h3>
 
-              {success && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                  <p className="font-medium">Request submitted successfully!</p>
-                  <p className="text-sm mt-1">
-                    Our team will contact you soon.
+              {success ? (
+                <div className="text-center py-8">
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-4">
+                    <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-semibold text-green-600">
+                    Thank you! Our team will contact you shortly.
                   </p>
                 </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name *
@@ -210,7 +228,7 @@ export default function LegalServicesPage() {
                     type="text"
                     value={formData.userName}
                     onChange={(e) => updateFormData("userName", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Your name"
                     required
                   />
@@ -226,7 +244,7 @@ export default function LegalServicesPage() {
                     onChange={(e) =>
                       updateFormData("userEmail", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="your@email.com"
                     required
                   />
@@ -242,7 +260,7 @@ export default function LegalServicesPage() {
                     onChange={(e) =>
                       updateFormData("userPhone", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="10-digit mobile number"
                     required
                   />
@@ -287,7 +305,7 @@ export default function LegalServicesPage() {
                     onChange={(e) =>
                       updateFormData("consultationMode", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="call">Phone Call</option>
                     <option value="video">Video Call</option>
@@ -303,15 +321,15 @@ export default function LegalServicesPage() {
                     value={formData.remarks}
                     onChange={(e) => updateFormData("remarks", e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Any additional information..."
                   />
                 </div>
 
                 <button
                   type="submit"
-                  disabled={loading || !selectedService}
-                  className="w-full px-4 py-3 bg-orange-custom text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  disabled={loading} //!selectedService
+                  className="w-full px-4 py-3 bg-orange-custom text-white rounded-lg hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
                 >
                   {loading ? "Submitting..." : "Book Consultation"}
                 </button>
@@ -320,13 +338,14 @@ export default function LegalServicesPage() {
                   Our legal experts will contact you within 24 hours
                 </p>
               </form>
+              )}
             </div>
           </div>
         </div>
 
         {/* How It Works Section */}
         <div className="mt-16 bg-white rounded-lg shadow-sm p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+          <h2 className="text-2xl font-bold properties-text-color mb-8 text-center">
             How It Works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

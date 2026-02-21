@@ -94,7 +94,7 @@ export default function LoginPage() {
       } else {
         data = await loginWithPhone(phone, otp);
       }
-
+      console.log("Login response:", data);
       localStorage.setItem(
         "userLoginDetails",
         JSON.stringify(data)
@@ -115,7 +115,7 @@ export default function LoginPage() {
       };
 
       storeAuthData(data, userInfo, remember);
-      navigate.push("/", { replace: true });
+      navigate.push("/properties", { replace: true });
     } catch (err) {
       setError(err.message || "Login failed.");
     } finally {

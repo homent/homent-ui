@@ -12,10 +12,12 @@ import {
 } from "lucide-react";
 import SiteHeader from "../components/SiteHeader";
 import { Input, Select, Feature, Textarea } from "../components/form-helpers";
+import { submitEnquiry } from '../services/apiService';
 
 export default function RentalPropertyManagementPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const [form, setForm] = useState({
     ownerName: "",
@@ -28,7 +30,7 @@ export default function RentalPropertyManagementPage() {
 
   const update = (k, v) => setForm((s) => ({ ...s, [k]: v }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -39,6 +41,18 @@ export default function RentalPropertyManagementPage() {
     }
 
     try {
+      const data = {
+        ownerName: form.ownerName,
+        email: form.email,
+        phone: form.phone,
+        countryCode: "+91",
+        city: form.city,
+        propertyType: form.propertyType,
+      };
+
+      await submitEnquiry('ADD_MANAGEMENT_ENQUIRY', data);
+
+      // Still save to localStorage for demo
       const enquiries =
         JSON.parse(localStorage.getItem("property_management_leads")) || [];
 
@@ -53,8 +67,7 @@ export default function RentalPropertyManagementPage() {
         JSON.stringify(enquiries)
       );
 
-      alert("Thank you! Our team will contact you shortly.");
-      router.push("/");
+      setSubmitted(true);
     } catch (err) {
       alert("Something went wrong. Please try again.");
     } finally {
@@ -250,7 +263,19 @@ export default function RentalPropertyManagementPage() {
               Talk to a property expert today
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {submitted ? (
+              <div className="text-center py-8">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-4">
+                  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-lg font-semibold text-green-600">
+                  Thank you! Our team will contact you shortly.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Owner Name *"
                 value={form.ownerName}
@@ -312,6 +337,7 @@ export default function RentalPropertyManagementPage() {
                 {loading ? "Submitting..." : "Request Callback"}
               </button>
             </form>
+            )}
           </div>
         </div>
       </div>

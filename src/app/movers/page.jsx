@@ -11,6 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import SiteHeader from "../components/SiteHeader";
+import { submitEnquiry } from '../services/apiService';
 
 export default function MoversPage() {
   const [formData, setFormData] = useState({
@@ -76,32 +77,37 @@ export default function MoversPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/moving-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const data = {
+        name: formData.userName,
+        email: formData.userEmail,
+        phone: formData.userPhone,
+        countryCode: "+91",
+        origin: formData.originAddress,
+        destination: formData.destinationAddress,
+        vehicleType: formData.vehicleType,
+        services: formData.servicesRequired.join(', '),
+        preferredDate: formData.preferredMoveDate,
+        time: formData.preferredTimeSlot,
+        note: formData.notes,
+      };
 
-      if (response.ok) {
-        setSuccess(true);
-        setFormData({
-          userName: "",
-          userEmail: "",
-          userPhone: "",
-          vehicleType: "tempo",
-          originAddress: "",
-          destinationAddress: "",
-          preferredMoveDate: "",
-          preferredTimeSlot: "9am-12pm",
-          approxVolume: "100-200",
-          servicesRequired: [],
-          specialItems: "",
-          notes: "",
-        });
-        setTimeout(() => setSuccess(false), 5000);
-      } else {
-        setError("Failed to submit request. Please try again.");
-      }
+      await submitEnquiry('ADD_MOVER_ENQUIRY', data);
+
+      setSuccess(true);
+      setFormData({
+        userName: "",
+        userEmail: "",
+        userPhone: "",
+        vehicleType: "tempo",
+        originAddress: "",
+        destinationAddress: "",
+        preferredMoveDate: "",
+        preferredTimeSlot: "9am-12pm",
+        approxVolume: "100-200",
+        servicesRequired: [],
+        specialItems: "",
+        notes: "",
+      });
     } catch (err) {
       console.error("Error submitting request:", err);
       setError("Error submitting request. Please try again.");
@@ -111,34 +117,46 @@ export default function MoversPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
       <SiteHeader Icon={Building2} title="Packers & Movers" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-          <Truck className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Packers & Movers
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Professional moving services with real-time tracking, insurance
-            coverage, and guaranteed safe delivery of your belongings.
-          </p>
+        <div className="relative text-center mb-20">
+        <div className="absolute inset-0 -z-10 flex justify-center">
+          <div className="h-64 w-64 rounded-full bg-orange-100 blur-3xl opacity-40" />
         </div>
+
+        {/* Icon badge */}
+        <div className="inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-custom text-white mb-6 shadow-lg shadow-orange-200">
+          <Truck className="h-10 w-10" />
+        </div>
+
+        {/* Heading */}
+        <h1 className="text-xl md:text-5xl font-extrabold properties-text-color mb-5 leading-tight">
+          Packers & Movers
+        </h1>
+
+      {/* Sub text */}
+      <p className="text-lg md:text-xl properties-text-color max-w-3xl mx-auto leading-relaxed">
+        Professional moving services with real-time tracking, insurance
+        coverage, and guaranteed safe delivery of your belongings.
+      </p>
+
+      </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Why Choose Us */}
             <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold properties-text-color mb-6">
                 Why Choose Our Service
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <Package className="h-6 w-6 text-blue-600" />
+                    <Package className="h-6 w-6 text-orange-custom" />
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -152,7 +170,7 @@ export default function MoversPage() {
                 </div>
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <MapPin className="h-6 w-6 text-blue-600" />
+                    <MapPin className="h-6 w-6 text-orange-custom" />
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -165,7 +183,7 @@ export default function MoversPage() {
                 </div>
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <Clock className="h-6 w-6 text-blue-600" />
+                    <Clock className="h-6 w-6 text-orange-custom" />
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -178,7 +196,7 @@ export default function MoversPage() {
                 </div>
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <AlertCircle className="h-6 w-6 text-blue-600" />
+                    <AlertCircle className="h-6 w-6 text-orange-custom" />
                   </div>
                   <div className="ml-4">
                     <h3 className="text-lg font-semibold text-gray-900">
@@ -194,7 +212,7 @@ export default function MoversPage() {
 
             {/* Services & Pricing */}
             <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold properties-text-color mb-6">
                 Service Pricing
               </h2>
               <div className="space-y-4">
@@ -212,7 +230,7 @@ export default function MoversPage() {
                           Capacity: {vehicle.capacity}
                         </p>
                       </div>
-                      <span className="text-xl font-bold text-blue-600">
+                      <span className="text-xl font-bold text-orange-custom">
                         From ₹5,000
                       </span>
                     </div>
@@ -229,26 +247,30 @@ export default function MoversPage() {
           {/* Booking Form */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">
+              <h3 className="text-xl font-bold properties-text-color mb-6">
                 Get a Quote
               </h3>
 
-              {success && (
-                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                  <p className="font-medium">Request submitted!</p>
-                  <p className="text-sm mt-1">
-                    Our team will contact you with a quote.
+              {success ? (
+                <div className="text-center py-8">
+                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 mb-4">
+                    <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-lg font-semibold text-green-600">
+                    Thank you! Our team will contact you shortly.
                   </p>
                 </div>
-              )}
+              ) : (
+                <>
+                  {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                      <p className="text-sm">{error}</p>
+                    </div>
+                  )}
 
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                  <p className="text-sm">{error}</p>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name *
@@ -257,7 +279,7 @@ export default function MoversPage() {
                     type="text"
                     value={formData.userName}
                     onChange={(e) => updateFormData("userName", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Your name"
                     required
                   />
@@ -273,7 +295,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("userEmail", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="your@email.com"
                     required
                   />
@@ -289,7 +311,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("userPhone", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="10-digit mobile"
                     required
                   />
@@ -305,7 +327,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("originAddress", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Current location"
                     required
                   />
@@ -321,7 +343,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("destinationAddress", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="New location"
                     required
                   />
@@ -336,7 +358,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("vehicleType", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     {vehicleTypes.map((vehicle) => (
                       <option key={vehicle.value} value={vehicle.value}>
@@ -356,7 +378,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("preferredMoveDate", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
 
@@ -369,7 +391,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("preferredTimeSlot", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="9am-12pm">9 AM - 12 PM</option>
                     <option value="12pm-3pm">12 PM - 3 PM</option>
@@ -391,7 +413,7 @@ export default function MoversPage() {
                             service.id,
                           )}
                           onChange={() => toggleService(service.id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-orange-custom focus:ring-orange-500 border-gray-300 rounded"
                         />
                         <span className="ml-2 text-sm text-gray-700">
                           {service.label}
@@ -409,7 +431,7 @@ export default function MoversPage() {
                     value={formData.notes}
                     onChange={(e) => updateFormData("notes", e.target.value)}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Any fragile items or special requirements..."
                   />
                 </div>
@@ -417,11 +439,13 @@ export default function MoversPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-4 py-3 bg-orange-custom text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  className="w-full px-4 py-3 bg-orange-custom text-white rounded-lg hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
                 >
                   {loading ? "Submitting..." : "Get Quote"}
                 </button>
               </form>
+              </>
+              )}
             </div>
           </div>
         </div>

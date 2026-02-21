@@ -42,7 +42,7 @@ export default function ProviderDetail() {
   const [isBroker, setIsBroker] = useState(false);
 
   useEffect(() => {
-    const role = localStorage.getItem("user_role");
+    const role = localStorage.getItem("role");
     setIsBroker(role === "broker");
 
     setProvider(SAMPLE_PROVIDERS[id] ?? null);

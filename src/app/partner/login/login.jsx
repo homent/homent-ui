@@ -52,7 +52,7 @@ export default function LoginPage() {
             storeAuthData(data, userInfo, remember);
 
             // Redirect to app home (adjust route as needed)
-            navigate.push("/", { replace: true });
+            navigate.push("/properties", { replace: true });
         } catch (err) {
             setError(err.message || "Login failed.");
         } finally {

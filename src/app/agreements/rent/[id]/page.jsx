@@ -17,7 +17,7 @@ export default function RentAgreementDetail() {
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
-        setIsBroker(localStorage.getItem("user_role") === "broker");
+        setIsBroker(localStorage.getItem("role") === "broker");
 
         const stored = JSON.parse(
           localStorage.getItem("agreements") || "[]"

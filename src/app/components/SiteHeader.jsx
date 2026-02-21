@@ -8,11 +8,13 @@ export default function SiteHeader({ title, Icon }) {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [userRole, setUserRole] = useState(false);
+  const [user, setUser] = useState(null);
   const menuRef = useRef(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setUserRole(localStorage.getItem("user_role") === "broker");
+      setUserRole(localStorage.getItem("role") === "broker");
+      setUser(JSON.parse(localStorage.getItem("userLoginDetails")) || null);
     }
 
     const onDocClick = (e) => {
@@ -80,7 +82,7 @@ export default function SiteHeader({ title, Icon }) {
                   >
                     <User className="h-5 w-5" />
                     <span className="hidden sm:block text-md">
-                      Sandhya
+                      {user?.firstName || "User"}
                     </span>
                   </button>
 

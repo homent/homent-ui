@@ -16,13 +16,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const storedUser = JSON.parse(
-      localStorage.getItem("user_profile") || "{}"
+      localStorage.getItem("userLoginDetails") || "{}"
     );
 
     setProfile({
-      fullName: storedUser.fullName || "Sandhya Khadakhade",
-      email: storedUser.email || "sandhya@email.com",
-      phone: storedUser.phone || "+91 98765 43210",
+      fullName: storedUser.firstName + " " + storedUser.lastName || "John Doe",
+      email: storedUser.email || "johndoe@email.com",
+      phone: storedUser.mobile || "+91 98765 43210",
     });
   }, []);
 

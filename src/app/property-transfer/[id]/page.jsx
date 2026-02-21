@@ -14,7 +14,7 @@ export default function PropertyTransferDetail() {
 
   useEffect(() => {
     try {
-      const role = localStorage.getItem("user_role");
+      const role = localStorage.getItem("role");
       setIsBroker(role === "broker");
 
       const stored = JSON.parse(

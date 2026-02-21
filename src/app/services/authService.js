@@ -82,7 +82,7 @@ export const storeAuthData = (data, userInfo, remember = true) => {
     })
   );
 
-  storage.setItem("user_role", "broker");
+  storage.setItem("role", "broker");
 };
 
 /**
@@ -93,9 +93,9 @@ export const clearAuthData = () => {
 
   window.localStorage.removeItem("authToken");
   window.localStorage.removeItem("authUser");
-  window.localStorage.removeItem("user_role");
+  window.localStorage.removeItem("role");
 
   window.sessionStorage.removeItem("authToken");
   window.sessionStorage.removeItem("authUser");
-  window.sessionStorage.removeItem("user_role");
+  window.sessionStorage.removeItem("role");
 };

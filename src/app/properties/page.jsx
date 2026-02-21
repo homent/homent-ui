@@ -64,7 +64,7 @@ export default function PropertiesPage() {
   }, [filters]);
 
     useEffect(() => {
-    const role = localStorage.getItem("user_role");
+    const role = localStorage.getItem("role");
     setIsBroker(role === "broker");
   }, []);
 
@@ -242,7 +242,6 @@ export default function PropertiesPage() {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </button>
-             {isBroker && (
               <div  className="mt-2">
                 <a
                   href="/properties/new"
@@ -250,20 +249,24 @@ export default function PropertiesPage() {
                 >
                   Add Property
                 </a>
-                <a
-                  href="/societies"
-                  className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
-                >
-                  View Societies
-                </a>
-                <a
-                  href="/society/enroll"
-                  className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
-                >
-                  Enroll Society
-                </a>
+                {isBroker && (
+                  <div>
+                    <a
+                    href="/societies"
+                    className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
+                  >
+                    View Societies
+                  </a>
+                  <a
+                    href="/society/enroll"
+                    className="px-4 py-2 mr-2 btn-bg-color text-white rounded-lg"
+                  >
+                    Enroll Society
+                  </a>
+                  </div>
+                 )}
             </div> 
-          )}
+      
           </div>
 
           {showFilters && (
@@ -386,8 +389,11 @@ function PropertyCard({ property, onContacted }) {
   const navigate = useRouter();
   const [saved, setSaved] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [contactNumber, setContactNumber] = useState("");
   const [contactName, setContactName] = useState("");
+  const [contactNameError, setContactNameError] = useState("");
+  const [contactPhoneError, setContactPhoneError] = useState("");
   const [otpEntered, setOtpEntered] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [sentOtp, setSentOtp] = useState(null);
@@ -397,8 +403,10 @@ function PropertyCard({ property, onContacted }) {
   const [otpError, setOtpError] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  
   const isValidPhone = (phone) => /^[6-9]\d{9}$/.test(phone);
-
+  const isValidName = (name) => /^[a-zA-Z\s]*$/.test(name) && name.trim().length > 0;
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   useEffect(() => {
     let interval;
@@ -410,32 +418,44 @@ function PropertyCard({ property, onContacted }) {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-
   const handleSave = async () => {
     setSaved(!saved);
   };
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: property.title,
-        text: property.description,
-        url: window.location.href,
-      });
-    } else {
-      // Fallback to copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard!");
+    setShareModalOpen(true);
+  };
+
+  const validateContactName = (name) => {
+    if (!name.trim()) {
+      setContactNameError("Name is required");
+      return false;
     }
+    if (!isValidName(name)) {
+      setContactNameError("Name should only contain letters and spaces");
+      return false;
+    }
+    setContactNameError("");
+    return true;
+  };
+
+  const validateContactPhone = (phone) => {
+    if (!phone) {
+      setContactPhoneError("Phone number is required");
+      return false;
+    }
+    if (!isValidPhone(phone)) {
+      setContactPhoneError("Enter a valid 10-digit mobile number starting with 6-9");
+      return false;
+    }
+    setContactPhoneError("");
+    return true;
   };
 
   const sendOtp = async () => {
-    if (!contactNumber) {
-      toast.error("Please enter phone number");
-      return;
-    }
+    setContactNameError("");
+    setContactPhoneError("");
 
-    if (!isValidPhone(contactNumber)) {
-      toast.error("Enter a valid 10-digit mobile number");
+    if (!validateContactName(contactName) | !validateContactPhone(contactNumber)) {
       return;
     }
 
@@ -452,7 +472,7 @@ function PropertyCard({ property, onContacted }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: contactName || "Anonymous",
+            name: contactName,
             phone: contactNumber,
             enquiryType: property.listing_type || "Rent",
             propertyId: property.id,
@@ -478,13 +498,11 @@ function PropertyCard({ property, onContacted }) {
     }
   };
 
-
-
   const handleContact = async () => {
     const userDetailsRaw = localStorage.getItem("userLoginDetails");
     const userDetails = JSON.parse(userDetailsRaw);
     console.log("userDetails", userDetails);
-    /* ---------------- LOGGED-IN USER ---------------- */
+
     if (userDetails?.id) {
       try {
         const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -521,8 +539,11 @@ function PropertyCard({ property, onContacted }) {
         return;
       }
     }
+
     setContactCountryCode("+91");
     setContactName("");
+    setContactNameError("");
+    setContactPhoneError("");
     setOtpEntered("");
     setOtpSent(false);
     setSentOtp(null);
@@ -530,11 +551,12 @@ function PropertyCard({ property, onContacted }) {
     setContactModalOpen(true);
   };
 
-
   const closeContactModal = () => {
     setContactModalOpen(false);
     setContactNumber("");
     setContactName("");
+    setContactNameError("");
+    setContactPhoneError("");
     setOtpEntered("");
     setOtpSent(false);
     setSentOtp(null);
@@ -562,7 +584,7 @@ function PropertyCard({ property, onContacted }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: contactName || " ",
+            name: contactName,
             phone: contactNumber,
             enquiryType: property.listing_type || "Rent",
             propertyId: property.id,
@@ -594,71 +616,17 @@ function PropertyCard({ property, onContacted }) {
     }
   };
 
-
-  const submitContact = async () => {
-    if (!contactNumber) {
-      toast.error("Please enter phone number");
-      return;
-    }
-
-    if (!otpEntered) {
-      toast.error("Please enter OTP");
-      return;
-    }
-
-    setContactLoading(true);
-
-    try {
-      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-      const response = await fetch(
-        `${BASE_URL}/homent?eventType=CUSTOMER_OTP_VERIFY&mobile=${contactNumber}&otp=${otpEntered}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: contactName || "Anonymous",
-            // email: "na@yopmail.com",
-            phone: contactNumber,
-            // msg: "Interested in property",
-            enquiryType: property.listing_type || "Rent",
-            propertyId: property.id,
-          }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        toast.error(result?.message || "OTP verification failed");
-        return;
-      }
-
-      toast.success("Phone verified successfully");
-
-      if (typeof onContacted === "function") {
-        onContacted(property.id);
-      }
-
-      closeContactModal();
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong");
-    } finally {
-      setContactLoading(false);
-    }
-  };
-
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({ name: "", email: "", phone: "", message: "" });
+  const [inquiryErrors, setInquiryErrors] = useState({ name: "", email: "", phone: "" });
   const [inquiryCountryCode, setInquiryCountryCode] = useState("+91");
   const [inquiryLoading, setInquiryLoading] = useState(false);
 
   const handleInquiry = async () => {
     const userDetailsRaw = localStorage.getItem("userLoginDetails");
     const userDetails = JSON.parse(userDetailsRaw);
-    console.log("userDetails inquery", userDetails);
-    // Open inquiry modal and prefill phone if available
+    console.log("userDetails inquiry", userDetails);
+
     const raw = userDetails?.phone || "";
     let phone = raw || "";
     if (phone && phone.startsWith("+")) {
@@ -670,59 +638,95 @@ function PropertyCard({ property, onContacted }) {
     } else {
       setInquiryCountryCode("+91");
     }
-    setInquiryData((d) => ({ ...d, phone, name: userDetails?.name || d?.name, id: userDetails?.id  }));
+    setInquiryData({ name: userDetails?.name || "", email: userDetails?.email || "", phone, message: "", id: userDetails?.id });
+    setInquiryErrors({ name: "", email: "", phone: "" });
     setShowInquiryForm(true);
   };
 
   const closeInquiryForm = () => {
     setShowInquiryForm(false);
     setInquiryData({ name: "", email: "", phone: "", message: "" });
+    setInquiryErrors({ name: "", email: "", phone: "" });
     setInquiryLoading(false);
     setInquiryCountryCode("+91");
+  };
+
+  const validateInquiryForm = () => {
+    const errors = { name: "", email: "", phone: "" };
+    let isValid = true;
+
+    if (!inquiryData.name.trim()) {
+      errors.name = "Name is required";
+      isValid = false;
+    } else if (!isValidName(inquiryData.name)) {
+      errors.name = "Name should only contain letters and spaces";
+      isValid = false;
+    }
+
+    if (!inquiryData.email.trim()) {
+      errors.email = "Email is required";
+      isValid = false;
+    } else if (!isValidEmail(inquiryData.email)) {
+      errors.email = "Enter a valid email address";
+      isValid = false;
+    }
+
+    if (!inquiryData.phone.trim()) {
+      errors.phone = "Phone is required";
+      isValid = false;
+    } else if (!isValidPhone(inquiryData.phone)) {
+      errors.phone = "Enter a valid 10-digit mobile number starting with 6-9";
+      isValid = false;
+    }
+
+    setInquiryErrors(errors);
+    return isValid;
   };
 
   const handleInquirySubmit = async (e) => {
     e && e.preventDefault && e.preventDefault();
     console.log("Submitting inquiry:", inquiryData);
-    // minimal validation
-    if (!inquiryData.name || !inquiryData.email || !inquiryData.phone) {
-      toast.error("Name, email and phone are required");
+
+    if (!validateInquiryForm()) {
+      toast.error("Please fix all errors before submitting");
       return;
     }
+
     setInquiryLoading(true);
-      try {
-        const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+    try {
+      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-        const response = await fetch(
-          `${BASE_URL}/homent?eventType=ADD_CUSTOMER_SERVICE_ENQUIRY`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: inquiryData.name,
-              email: inquiryData.email,
-              phone: inquiryData.phone,
-              message: inquiryData.message,
-              enquiryType: "enquiry",
-              propertyId: property.id,
-              userId: inquiryData?.id,
-            }),
-          }
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          toast.error(result?.message || "Failed to send inquiry");
+      const response = await fetch(
+        `${BASE_URL}/homent?eventType=ADD_CUSTOMER_SERVICE_ENQUIRY`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: inquiryData.name,
+            email: inquiryData.email,
+            phone: inquiryData.phone,
+            message: inquiryData.message,
+            enquiryType: "enquiry",
+            propertyId: property.id,
+            userId: inquiryData?.id,
+          }),
         }
-        toast.success("Inquiry sent successfully");
-        closeInquiryForm();
-      } catch (error) {
-        console.error("Inquiry submit error:", error);
-        toast.error("Failed to send inquiry");
-      } finally {
-        setInquiryLoading(false);
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result?.message || "Failed to send inquiry");
+        return;
       }
+      toast.success("Inquiry sent successfully");
+      closeInquiryForm();
+    } catch (error) {
+      console.error("Inquiry submit error:", error);
+      toast.error("Failed to send inquiry");
+    } finally {
+      setInquiryLoading(false);
+    }
   };
 
   const formatPrice = (price) => {
@@ -749,17 +753,16 @@ function PropertyCard({ property, onContacted }) {
       {/* Property Image */}
       <div className="relative h-48 bg-gray-200">
         {property.photos && property.photos.length > 0 ? (
-          // <a href={`/properties/${property.id}`} >
-             <div
-              onClick={() => navigate.push(`/properties/${property.id}`)}
-              className="cursor-pointer block w-full h-full"
-            >
+          <div
+            onClick={() => navigate.push(`/properties/${property.id}`)}
+            className="cursor-pointer block w-full h-full"
+          >
             <img
               src={property.photos[0].url}
               alt={property.title}
               className="w-full h-full object-cover"
             />
-            </div>
+          </div>
         ) : (
           <div onClick={() => navigate.push(`/properties/${property.id}`)} className="w-full h-full flex items-center justify-center block">
             <Building2 className="h-12 w-12 text-gray-400" />
@@ -780,7 +783,7 @@ function PropertyCard({ property, onContacted }) {
         <div className="absolute top-3 right-3 flex space-x-2">
           <button
             onClick={handleSave}
-            className={`p-2 rounded-full ${saved ? "bg-red-500 text-white" : "bg-white text-gray-600"} hover:bg-red-500 hover:text-white transition-colors`}
+            className={`p-2 rounded-full bg-white ${saved ? "text-red-500" : "text-gray-600"} hover:text-red-500 transition-colors`}
           >
             <Heart className="h-4 w-4" />
           </button>
@@ -814,7 +817,6 @@ function PropertyCard({ property, onContacted }) {
             >
               <span className="hover:underline">{property?.societyDetail?.societyName || property.title}</span>
             </div>
-            {/* <a href={`/properties/${property.id}`} className="hover:underline">{property.title}</a> */}
           </h3>
           <div className="text-right">
             <div className="text-xl font-bold properties-text-color">
@@ -833,27 +835,27 @@ function PropertyCard({ property, onContacted }) {
         </p>
 
         {/* Property Specs */}
-        <div className="flex items-center space-x-4 mb-3 text-sm properties-text-color font-weight-600">
+        <div className="flex items-center space-x-4 mb-3 text-xs properties-text-color font-weight-600">
           {property.bedrooms && (
-            <div className="flex items-center">
+            <div className="flex items-center bg-orange-50 px-2 py-1 rounded">
               <Bed className="h-4 w-4 mr-1" />
               {property.bedrooms} BHK
             </div>
           )}
           {property.bathrooms && (
-            <div className="flex items-center">
+            <div className="flex items-center bg-orange-50 px-2 py-1 rounded">
               <Bath className="h-4 w-4 mr-1" />
               {property.bathrooms}
             </div>
           )}
           {property.parking > 0 && (
-            <div className="flex items-center">
+            <div className="flex items-center bg-orange-50 px-2 py-1 rounded">
               <Car className="h-4 w-4 mr-1" />
               {property.parking}
             </div>
           )}
           {property.built_area && (
-            <div className="text-xs">{property.built_area} sqft</div>
+            <div className="bg-orange-50 px-2 py-1 rounded">{property.built_area} sqft</div>
           )}
         </div>
 
@@ -872,24 +874,22 @@ function PropertyCard({ property, onContacted }) {
               {property.amenities.slice(0, 3).map((amenity, index) => (
                 <span
                   key={index}
-                  className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+                  className="px-2 py-1 bg-orange-50 text-orange-800 rounded text-xs"
                 >
                   {amenity}
                 </span>
               ))}
               {property.amenities.length > 3 && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                <span className="px-2 py-1 bg-orange-50 text-orange-800 rounded text-xs">
                   +{property.amenities.length - 3} more
                 </span>
               )}
             </div>
           </div>
         )}
-        {/* user */}
-        {localStorage.getItem("user_role") !== "broker" && property.contacted && (
+
+        {localStorage.getItem("role") !== "broker" && property.contacted && (
           <div className="mb-4 rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-4 shadow-sm">
-            
-            {/* Status */}
             <div className="flex items-center gap-2 mb-2">
               <span className="flex items-center gap-1 px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
                 <svg
@@ -905,9 +905,7 @@ function PropertyCard({ property, onContacted }) {
               </span>
             </div>
 
-            {/* Owner Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-white rounded-full shadow">
                   <svg
@@ -947,20 +945,17 @@ function PropertyCard({ property, onContacted }) {
                   </p>
                 </div>
               </div>
-
             </div>
           </div>
         )}
 
-
-        {/* broker */}
-        {  localStorage.getItem("user_role") === "broker" && (
+        {localStorage.getItem("role") === "broker" && (
           <div className="mb-4">
-              <div className="flex flex-wrap gap-1 items-center">
-                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                    None Contacted
-                  </span>
-              </div>
+            <div className="flex flex-wrap gap-1 items-center">
+              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                None Contacted
+              </span>
+            </div>
           </div>
         )}
 
@@ -969,7 +964,7 @@ function PropertyCard({ property, onContacted }) {
           <button
             disabled={property.contacted}
             onClick={handleContact}
-            className="flex-1 flex items-center justify-center px-3 py-2 btn-bg-color text-white rounded-lg hover:btn-bg-color transition-colors text-sm"
+            className="flex-1 flex items-center justify-center px-3 py-2 btn-bg-color text-white rounded-lg hover:btn-bg-color transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Phone className="h-4 w-4 mr-1" />
             Contact Owner
@@ -983,6 +978,8 @@ function PropertyCard({ property, onContacted }) {
           </button>
         </div>
       </div>
+
+      {/* Contact Owner Modal */}
       {contactModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={closeContactModal} />
@@ -993,29 +990,46 @@ function PropertyCard({ property, onContacted }) {
             <input
               type="text"
               value={contactName}
-              onChange={(e) => setContactName(e.target.value)}
-              className="w-full px-3 py-2 border rounded mb-3"
+              onChange={(e) => {
+                setContactName(e.target.value);
+                setContactNameError(""); // Clear error on change
+              }}
+              onBlur={() => validateContactName(contactName)}
+              disabled={otpSent}
+              className={`w-full px-3 py-2 border rounded mb-1 ${contactNameError ? "border-red-500" : ""}`}
               placeholder="Enter your name"
             />
+            {contactNameError && (
+              <p className="text-sm text-red-600 mb-3">{contactNameError}</p>
+            )}
 
             <label className="block text-sm properties-text-color mb-2">Phone number</label>
-            <div className="flex mb-3">
-              <input
-                id={`wa-cc-${property.id}`}
-                type="text"
-                value={contactCountryCode}
-                onChange={(e) => setContactCountryCode(e.target.value)}
-                className="w-20 px-3 py-2 border border-r-0 rounded-l-md bg-white text-sm"
-              />
-              <input
-                type="tel"
-                disabled={otpSent}
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-r-md"
-                placeholder="Enter phone number"
-              />
+            <div className="mb-1">
+              <div className="flex">
+                <input
+                  id={`wa-cc-${property.id}`}
+                  type="text"
+                  value={contactCountryCode}
+                  onChange={(e) => setContactCountryCode(e.target.value)}
+                  className="w-20 px-3 py-2 border border-r-0 rounded-l-md bg-white text-sm font-bold"
+                />
+                <input
+                  type="tel"
+                  disabled={otpSent}
+                  value={contactNumber}
+                  onChange={(e) => {
+                    setContactNumber(e.target.value);
+                    setContactPhoneError(""); // Clear error on change
+                  }}
+                  onBlur={() => validateContactPhone(contactNumber)}
+                  className={`flex-1 px-3 py-2 border rounded-r-md ${contactPhoneError ? "border-red-500" : ""}`}
+                  placeholder="Enter phone number"
+                />
+              </div>
             </div>
+            {contactPhoneError && (
+              <p className="text-sm text-red-600 mb-3">{contactPhoneError}</p>
+            )}
 
             <div className="flex items-center mb-3">
               <label htmlFor={`wa-toggle-${property.id}`} className="flex items-center cursor-pointer">
@@ -1025,6 +1039,7 @@ function PropertyCard({ property, onContacted }) {
                     type="checkbox"
                     checked={contactUseWhatsApp}
                     onChange={(e) => setContactUseWhatsApp(e.target.checked)}
+                    disabled={otpSent}
                     className="sr-only"
                   />
                   <div className={`w-11 h-6 rounded-full transition-colors ${contactUseWhatsApp ? 'bg-green-500' : 'bg-gray-200'}`} />
@@ -1034,31 +1049,36 @@ function PropertyCard({ property, onContacted }) {
               </label>
             </div>
 
-            <label className="block text-sm properties-text-color mb-2">OTP</label>
-            <input
-              type="text"
-              value={otpEntered}
-              onChange={(e) => {
-                setOtpEntered(e.target.value);
-                setOtpError("");
-              }}
-              className={`w-full px-3 py-2 border rounded mb-1 ${
-                otpError ? "border-red-500" : ""
-              }`}
-              placeholder={otpSent ? "Enter received OTP" : "Click Send OTP"}
-            />
-            {otpError && (
-              <p className="text-sm text-red-600 mb-2">{otpError}</p>
+            {!otpSent && (
+              <p className="text-xs text-gray-500 mb-3">OTP text field will appear after sending OTP</p>
             )}
 
-            <div className="flex items-center justify-between">
+            {otpSent && (
+              <>
+                <label className="block text-sm properties-text-color mb-2">OTP</label>
+                <input
+                  type="text"
+                  value={otpEntered}
+                  onChange={(e) => {
+                    setOtpEntered(e.target.value);
+                    setOtpError("");
+                  }}
+                  className={`w-full px-3 py-2 border rounded mb-1 ${
+                    otpError ? "border-red-500" : ""
+                  }`}
+                  placeholder="Enter received OTP"
+                />
+                {otpError && (
+                  <p className="text-sm text-red-600 mb-3">{otpError}</p>
+                )}
+              </>
+            )}
 
+            <div className="flex items-center justify-between gap-2 mt-4">
               <button
                 onClick={otpSent ? verifyOtp : sendOtp}
-                disabled={contactLoading}
-               className={`btn-bg-color text-white px-4 py-2 rounded
-                  ${(!isValidPhone(contactNumber)) ? "opacity-60 cursor-not-allowed" : ""}
-                `}
+                disabled={contactLoading || (!otpSent && !isValidPhone(contactNumber))}
+                className={`btn-bg-color text-white px-4 py-2 rounded disabled:opacity-60 disabled:cursor-not-allowed`}
               >
                 {otpSent
                   ? contactLoading ? "Verifying..." : "Submit"
@@ -1067,11 +1087,11 @@ function PropertyCard({ property, onContacted }) {
               {otpSent && (
                 <button
                   onClick={sendOtp}
-                  disabled={resendTimer > 0}
-                  className="text-sm properties-text-color disabled:text-gray-400"
+                  disabled={resendTimer > 0 || contactLoading}
+                  className="text-sm properties-text-color disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
                   {resendTimer > 0
-                    ? `Resend OTP in ${resendTimer}s`
+                    ? `Resend in ${resendTimer}s`
                     : "Resend OTP"}
                 </button>
               )}
@@ -1081,6 +1101,8 @@ function PropertyCard({ property, onContacted }) {
           </div>
         </div>
       )}
+
+      {/* Inquiry Form Modal */}
       {showInquiryForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" onClick={closeInquiryForm} />
@@ -1093,23 +1115,35 @@ function PropertyCard({ property, onContacted }) {
                 <input
                   type="text"
                   value={inquiryData.name}
-                  onChange={(e) => setInquiryData((s) => ({ ...s, name: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded"
-                  required
+                  onChange={(e) => {
+                    setInquiryData((s) => ({ ...s, name: e.target.value }));
+                    if (inquiryErrors.name) setInquiryErrors((s) => ({ ...s, name: "" }));
+                  }}
+                  className={`w-full px-3 py-2 border rounded ${inquiryErrors.name ? "border-red-500" : ""}`}
                   placeholder="Enter your name"
                 />
+                {inquiryErrors.name && (
+                  <p className="text-sm text-red-600 mt-1">{inquiryErrors.name}</p>
+                )}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={inquiryData.email}
-                  onChange={(e) => setInquiryData((s) => ({ ...s, email: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded"
-                  required
+                  onChange={(e) => {
+                    setInquiryData((s) => ({ ...s, email: e.target.value }));
+                    if (inquiryErrors.email) setInquiryErrors((s) => ({ ...s, email: "" }));
+                  }}
+                  className={`w-full px-3 py-2 border rounded ${inquiryErrors.email ? "border-red-500" : ""}`}
                 />
+                {inquiryErrors.email && (
+                  <p className="text-sm text-red-600 mt-1">{inquiryErrors.email}</p>
+                )}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                 <div className="flex">
@@ -1118,35 +1152,116 @@ function PropertyCard({ property, onContacted }) {
                     type="text"
                     value={inquiryCountryCode}
                     onChange={(e) => setInquiryCountryCode(e.target.value)}
-                    className="w-20 px-3 py-2 border border-r-0 rounded-l-md bg-white text-sm"
+                    className="w-20 px-3 py-2 border border-r-0 rounded-l-md bg-white text-sm font-bold"
                   />
                   <input
                     type="tel"
                     value={inquiryData.phone}
-                    onChange={(e) => setInquiryData((s) => ({ ...s, phone: e.target.value }))}
-                    className="flex-1 px-3 py-2 border rounded-r-md"
-                    required
+                    onChange={(e) => {
+                      setInquiryData((s) => ({ ...s, phone: e.target.value }));
+                      if (inquiryErrors.phone) setInquiryErrors((s) => ({ ...s, phone: "" }));
+                    }}
+                    className={`flex-1 px-3 py-2 border rounded-r-md ${inquiryErrors.phone ? "border-red-500" : ""}`}
                     placeholder="Enter your phone number"
                   />
                 </div>
+                {inquiryErrors.phone && (
+                  <p className="text-sm text-red-600 mt-1">{inquiryErrors.phone}</p>
+                )}
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
                 <textarea
                   value={inquiryData.message}
                   onChange={(e) => setInquiryData((s) => ({ ...s, message: e.target.value }))}
-                  rows={4}
+                  rows={3}
                   className="w-full px-3 py-2 border rounded"
+                  placeholder="Additional details about your inquiry"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <button type="submit" disabled={inquiryLoading} className={`px-4 py-2 bg-orange-custom text-white rounded ${inquiryLoading ? 'opacity-60 cursor-not-allowed' : ''}`}>
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="submit"
+                  disabled={inquiryLoading}
+                  className={`px-4 py-2 bg-orange-custom text-white rounded ${inquiryLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
                   {inquiryLoading ? 'Sending...' : 'Send Inquiry'}
                 </button>
-                <button type="button" onClick={closeInquiryForm} className="px-4 py-2 text-sm text-gray-600">Cancel</button>
+                <button
+                  type="button"
+                  onClick={closeInquiryForm}
+                  className="px-4 py-2 text-sm text-gray-600"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {shareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShareModalOpen(false)} />
+          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold properties-text-color mb-4">Share Property</h3>
+            <p className="text-sm text-gray-600 mb-4">Choose how you'd like to share this property:</p>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  const url = `https://teams.microsoft.com/share?url=${encodeURIComponent(window.location.href)}&msg=${encodeURIComponent(`${property.title}\n${property.description}`)}`;
+                  window.open(url, '_blank');
+                  setShareModalOpen(false);
+                }}
+                className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-600 rounded mr-3 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">T</span>
+                </div>
+                <span className="text-sm font-medium">Share via Microsoft Teams</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const subject = encodeURIComponent(property.title);
+                  const body = encodeURIComponent(`${property.description}\n\n${window.location.href}`);
+                  const url = `mailto:?subject=${subject}&body=${body}`;
+                  window.open(url, '_blank');
+                  setShareModalOpen(false);
+                }}
+                className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-8 h-8 bg-blue-500 rounded mr-3 flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">O</span>
+                </div>
+                <span className="text-sm font-medium">Share via Outlook</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard!");
+                  setShareModalOpen(false);
+                }}
+                className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-8 h-8 bg-gray-400 rounded mr-3 flex items-center justify-center">
+                  <span className="text-white text-sm">📋</span>
+                </div>
+                <span className="text-sm font-medium">Copy Link</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShareModalOpen(false)}
+              className="mt-4 w-full px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

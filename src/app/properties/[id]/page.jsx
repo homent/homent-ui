@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter  } from "next/navigation";
 import {
   Building2,
@@ -25,16 +25,24 @@ import { mapFormToApiBody, mapEditFormToApiBody } from "../../../utils/propertyM
 import SocietyDropdown from "../../components/SocietyDropdown";
 
 export default function PropertyDetailPage({ params }) {
+  // Unwrap params Promise for Next.js compatibility
+  const resolvedParams = use(params);
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [saved, setSaved] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [showInquiryForm, setShowInquiryForm] = useState(false);
   const [inquiryData, setInquiryData] = useState({
     name: "",
     email: "",
     phone: "",
     message: "",
+  });
+  const [inquiryErrors, setInquiryErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -45,6 +53,7 @@ export default function PropertyDetailPage({ params }) {
     price: "",
     bedrooms: "",
     bathrooms: "",
+    phone: "",
     description: "",
     photos: "",
     // additional fields mirrored from create form
@@ -65,11 +74,11 @@ export default function PropertyDetailPage({ params }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    if (params.id !== "new") fetchProperty();
-  }, [params.id]);
+    if (resolvedParams.id !== "new") fetchProperty();
+  }, [resolvedParams.id]);
 
   // If we're in creation mode, render the create form immediately (don't wait for fetch)
-  if (params.id === "new") {
+  if (resolvedParams.id === "new") {
     return <CreatePropertyForm />;
   }
 
@@ -114,7 +123,7 @@ export default function PropertyDetailPage({ params }) {
         eventType: "GET_PROPERTY_SINGLE",
         userId: 1,
         status: "Active",
-        propertyId: params.id,
+        propertyId: resolvedParams.id,
       });
 
       const response = await fetch(
@@ -146,7 +155,7 @@ export default function PropertyDetailPage({ params }) {
         localStorage.getItem("mock_properties") || "null"
       );
       loaded = stored
-        ? stored.find((p) => String(p.id) === String(params.id))
+        ? stored.find((p) => String(p.id) === String(resolvedParams.id))
         : null;
     }
 
@@ -183,16 +192,7 @@ export default function PropertyDetailPage({ params }) {
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: property?.title,
-        text: property?.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard!");
-    }
+    setShareModalOpen(true);
   };
 
   const openEdit = () => {
@@ -209,6 +209,7 @@ export default function PropertyDetailPage({ params }) {
       price: property.price ? String(property.price) : "",
       bedrooms: property.bedroom ? String(property.bedroom) : "",
       bathrooms: property.bathroom ? String(property.bathroom) : "",
+      phone: property.phone || "",
       description: property.description || "",
       photos: property.photos ? property.photos.join(", ") : "",
       total_floors: societyDetail.totalFloor ? String(societyDetail.totalFloor) : "",
@@ -367,20 +368,52 @@ export default function PropertyDetailPage({ params }) {
 
   const handleInquirySubmit = async (e) => {
     e.preventDefault();
+
+    // Validation
+    const errors = {};
+    if (!inquiryData.name.trim()) {
+      errors.name = "Name is required";
+    }
+    if (!inquiryData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inquiryData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+    if (!inquiryData.phone.trim()) {
+      errors.phone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(inquiryData.phone.replace(/\s+/g, ""))) {
+      errors.phone = "Please enter a valid 10-digit phone number";
+    }
+
+    setInquiryErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
     try {
-      const response = await fetch("/api/property-inquiries", {
+      const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await fetch(`${BASE_URL}/homent?userId=1&eventType=ADD_PROPERTY_INQUIRY`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          propertyId: params.id,
-          ...inquiryData,
+          propertyId: resolvedParams.id,
+          name: inquiryData.name,
+          email: inquiryData.email,
+          phone: inquiryData.phone,
+          message: inquiryData.message,
         }),
       });
 
       if (response.ok) {
         toast.success("Inquiry sent successfully!");
         setInquiryData({ name: "", email: "", phone: "", message: "" });
+        setInquiryErrors({ name: "", email: "", phone: "" });
         setShowInquiryForm(false);
+      } else {
+        toast.error("Failed to send inquiry. Please try again.");
       }
     } catch (error) {
       console.error("Error sending inquiry:", error);
@@ -449,10 +482,10 @@ export default function PropertyDetailPage({ params }) {
     }
   })();
 
-  // Is current viewer a broker? Simple flag controlled via localStorage for now (set user_role='broker' to test)
+  // Is current viewer a broker? Simple flag controlled via localStorage for now (set role='broker' to test)
   const isBroker = (() => {
     try {
-      return localStorage.getItem('user_role') === 'broker';
+      return localStorage.getItem('role') === 'broker';
     } catch (e) {
       return false;
     }
@@ -601,10 +634,10 @@ export default function PropertyDetailPage({ params }) {
                 <div className="flex space-x-2">
                     <button
                       onClick={handleSave}
-                      className={`p-3 rounded-full ${saved ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-600"} hover:bg-red-100 hover:text-red-600 transition-colors`}
+                      className="p-3 rounded-full bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-gray-600 transition-colors"
                     >
                       <Heart
-                        className="h-6 w-6"
+                        className={`h-6 w-6 ${saved ? "text-red-500" : "text-gray-600"}`}
                         fill={saved ? "currentColor" : "none"}
                       />
                     </button>
@@ -746,6 +779,10 @@ export default function PropertyDetailPage({ params }) {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Bathrooms</label>
                         <input type="number" value={editForm.bathrooms} onChange={(e) => updateEdit("bathrooms", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Phone</label>
+                        <input type="text" value={editForm.phone} onChange={(e) => updateEdit("phone", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
                       </div>
                     </div>
 
@@ -920,37 +957,37 @@ export default function PropertyDetailPage({ params }) {
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {property.bedroom && (
-                  <div className="text-center">
-                    <Bed className="h-8 w-8 properties-text-color mx-auto mb-2" />
-                    <p className="properties-text-color text-sm">Bedrooms</p>
-                    <p className="text-lg font-semibold properties-text-color">
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center hover:bg-orange-100 transition-colors">
+                    <Bed className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                    <p className="text-orange-700 text-sm font-medium">Bedrooms</p>
+                    <p className="text-xl font-bold text-orange-800">
                       {property.bedroom}
                     </p>
                   </div>
                 )}
                 {property.bathroom && (
-                  <div className="text-center">
-                    <Bath className="h-8 w-8 properties-text-color mx-auto mb-2" />
-                    <p className="properties-text-color text-sm">Bathrooms</p>
-                    <p className="text-lg font-semibold properties-text-color">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center hover:bg-blue-100 transition-colors">
+                    <Bath className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                    <p className="text-blue-700 text-sm font-medium">Bathrooms</p>
+                    <p className="text-xl font-bold text-blue-800">
                       {property.bathroom}
                     </p>
                   </div>
                 )}
                 {property.parking >= 0 && (
-                  <div className="text-center">
-                    <Car className="h-8 w-8 properties-text-color mx-auto mb-2" />
-                    <p className="properties-text-color text-sm">Parking</p>
-                    <p className="text-lg font-semibold properties-text-color">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center hover:bg-green-100 transition-colors">
+                    <Car className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                    <p className="text-green-700 text-sm font-medium">Parking</p>
+                    <p className="text-xl font-bold text-green-800">
                       {property.parking}
                     </p>
                   </div>
                 )}
                 {property.builtArea && (
-                  <div className="text-center">
-                    <Building2 className="h-8 w-8 properties-text-color mx-auto mb-2" />
-                    <p className="properties-text-color text-sm">Built Area</p>
-                    <p className="text-lg font-semibold properties-text-color">
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center hover:bg-purple-100 transition-colors">
+                    <Building2 className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                    <p className="text-purple-700 text-sm font-medium">Built Area</p>
+                    <p className="text-xl font-bold text-purple-800">
                       {Math.round(property.builtArea)} sqft
                     </p>
                   </div>
@@ -1006,14 +1043,14 @@ export default function PropertyDetailPage({ params }) {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {property.amenities.map((amenity, index) => (
-                    <div key={index} className="flex items-center">
+                    <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
                       <div className="flex-shrink-0">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-md bg-blue-500 text-white">
+                        <div className="flex items-center justify-center h-10 w-10 rounded-md bg-orange-100 text-orange-600">
                           <Wifi className="h-5 w-5" />
                         </div>
                       </div>
                       <div className="ml-4">
-                        <p className="text-gray-900 font-medium">{amenity}</p>
+                        <p className="text-gray-800 font-semibold text-sm">{amenity}</p>
                       </div>
                     </div>
                   ))}
@@ -1023,54 +1060,84 @@ export default function PropertyDetailPage({ params }) {
 
             {/* Additional Details */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-              <h2 className="text-xl font-bold properties-text-color mb-4">
+              <h2 className="text-xl font-bold properties-text-color mb-6">
                 Additional Details
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {property.furnishStatus && (
-                  <div>
-                    <p className="properties-text-color text-sm mb-1">Furnishing</p>
-                    <p className="properties-text-color font-medium">
+                  <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 border border-indigo-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white text-sm">🏠</span>
+                      </div>
+                      <p className="text-indigo-700 font-semibold text-sm">Furnishing</p>
+                    </div>
+                    <p className="text-indigo-900 font-bold text-lg ml-11">
                       {property.furnishStatus.replace("_", " ")}
                     </p>
                   </div>
                 )}
                 {property.societyDetail?.buildYear && (
-                  <div>
-                    <p className="properties-text-color text-sm mb-1">Year Built</p>
-                    <p className="properties-text-color font-medium">
+                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white text-sm">📅</span>
+                      </div>
+                      <p className="text-emerald-700 font-semibold text-sm">Year Built</p>
+                    </div>
+                    <p className="text-emerald-900 font-bold text-lg ml-11">
                       {property.societyDetail.buildYear}
                     </p>
                   </div>
                 )}
                 {property.floor && (
-                  <div>
-                    <p className="properties-text-color text-sm mb-1">Floor Number</p>
-                    <p className="properties-text-color font-medium">
+                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white text-sm">🏢</span>
+                      </div>
+                      <p className="text-amber-700 font-semibold text-sm">Floor Number</p>
+                    </div>
+                    <p className="text-amber-900 font-bold text-lg ml-11">
                       {property.floor}
                     </p>
                   </div>
                 )}
                 {property.societyDetail?.totalFloor && (
-                  <div>
-                    <p className="properties-text-color text-sm mb-1">Total Floors</p>
-                    <p className="properties-text-color font-medium">
+                  <div className="bg-gradient-to-r from-rose-50 to-rose-100 border border-rose-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white text-sm">🏗️</span>
+                      </div>
+                      <p className="text-rose-700 font-semibold text-sm">Total Floors</p>
+                    </div>
+                    <p className="text-rose-900 font-bold text-lg ml-11">
                       {property.societyDetail.totalFloor}
                     </p>
                   </div>
                 )}
                 {property.carpetArea && (
-                  <div>
-                    <p className="properties-text-color text-sm mb-1">Carpet Area</p>
-                    <p className="properties-text-color font-medium">
+                  <div className="bg-gradient-to-r from-cyan-50 to-cyan-100 border border-cyan-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white text-sm">📐</span>
+                      </div>
+                      <p className="text-cyan-700 font-semibold text-sm">Carpet Area</p>
+                    </div>
+                    <p className="text-cyan-900 font-bold text-lg ml-11">
                       {Math.round(property.carpetArea)} sqft
                     </p>
                   </div>
                 )}
                 {property.builtArea && (
-                  <div>
-                    <p className="properties-text-color text-sm mb-1">Plot Area</p>
-                    <p className="properties-text-color font-medium">
+                  <div className="bg-gradient-to-r from-violet-50 to-violet-100 border border-violet-200 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center mb-2">
+                      <div className="w-8 h-8 bg-violet-500 rounded-full flex items-center justify-center mr-3">
+                        <span className="text-white text-sm">📏</span>
+                      </div>
+                      <p className="text-violet-700 font-semibold text-sm">Plot Area</p>
+                    </div>
+                    <p className="text-violet-900 font-bold text-lg ml-11">
                       {Math.round(property.builtArea)} sqft
                     </p>
                   </div>
@@ -1084,7 +1151,7 @@ export default function PropertyDetailPage({ params }) {
                   Services
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                   {/* Packers & Movers */}
                   <a
@@ -1127,6 +1194,66 @@ export default function PropertyDetailPage({ params }) {
                     </div>
                   </a>
 
+                  {/* property management */}
+                  <a
+                    href="/services/home-loan"
+                    className="group flex gap-4 items-start rounded-xl border border-gray-200 bg-white p-5
+                              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-50 text-purple-600 text-xl transition-transform duration-300 group-hover:scale-110">
+                      🏦
+                    </div>
+
+                    <div>
+                      <div className="text-base font-semibold text-gray-800 mb-1">
+                       Rental Property Management
+                      </div>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        Hassle-free rental management for homeowners & NRIs. We take care of tenants, rent, maintenanceand legal compliance — end to end.
+                      </div>
+                    </div>
+                  </a>
+
+                  {/* Property transfer */}
+                  <a
+                    href="/property-transfer/create-property-transfer"
+                    className="group flex gap-4 items-start rounded-xl border border-gray-200 bg-white p-5
+                              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600 text-xl transition-transform duration-300 group-hover:scale-110">
+                      🛡️
+                    </div>
+
+                    <div>
+                      <div className="text-base font-semibold text-gray-800 mb-1">
+                        Property Transfer Service
+                      </div>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        Seamless property transfer services for smooth ownership changes.
+                      </div>
+                    </div>
+                  </a>
+
+                  {/* Legal Services */}
+                  <a
+                    href="/legal"
+                    className="group flex gap-4 items-start rounded-xl border border-gray-200 bg-white p-5
+                              transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 text-xl transition-transform duration-300 group-hover:scale-110">
+                      ⚖️
+                    </div>
+
+                    <div>
+                      <div className="text-base font-semibold text-gray-800 mb-1">
+                        Legal Services
+                      </div>
+                      <div className="text-sm text-gray-600 leading-relaxed">
+                        Expert legal assistance for property documentation and disputes.
+                      </div>
+                    </div>
+                  </a>
+
                 </div>
               </div>
           </div>
@@ -1139,7 +1266,17 @@ export default function PropertyDetailPage({ params }) {
                 Contact Agent
               </h3>
               <div className="space-y-3 mb-6">
-                <button className="w-full flex items-center justify-center px-4 py-3 bg-orange-custom text-white rounded-lg transition-colors">
+                <button 
+                  onClick={() => {
+                    // Try to call if phone number is available
+                    if (property?.phone) {
+                      window.location.href = `tel:${property.phone.replace(/\s+/g, '')}`;
+                    } else {
+                      toast.error("Agent phone number not available");
+                    }
+                  }}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-orange-custom text-white rounded-lg hover:bg-orange-600 transition-colors"
+                >
                   <Phone className="h-5 w-5 mr-2" />
                   Call Agent
                 </button>
@@ -1151,8 +1288,14 @@ export default function PropertyDetailPage({ params }) {
 
               {/* Inquiry Form Toggle */}
               <button
-                onClick={() => setShowInquiryForm(!showInquiryForm)}
-                className="w-full px-4 py-3 border btn-border-color btn-text-color-secondary text-white rounded-lg transition-colors"
+                onClick={() => {
+                  setShowInquiryForm(!showInquiryForm);
+                  if (showInquiryForm) {
+                    // Clear errors when closing form
+                    setInquiryErrors({ name: "", email: "", phone: "" });
+                  }
+                }}
+                className="w-full px-4 py-3 border btn-border-color btn-text-color-secondary rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Send Inquiry
               </button>
@@ -1171,15 +1314,23 @@ export default function PropertyDetailPage({ params }) {
                       <input
                         type="text"
                         value={inquiryData.name}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setInquiryData({
                             ...inquiryData,
                             name: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          });
+                          if (inquiryErrors.name) {
+                            setInquiryErrors({ ...inquiryErrors, name: "" });
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          inquiryErrors.name ? "border-red-500" : "border-gray-300"
+                        }`}
                         required
                       />
+                      {inquiryErrors.name && (
+                        <p className="mt-1 text-sm text-red-600">{inquiryErrors.name}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1188,15 +1339,23 @@ export default function PropertyDetailPage({ params }) {
                       <input
                         type="email"
                         value={inquiryData.email}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setInquiryData({
                             ...inquiryData,
                             email: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          });
+                          if (inquiryErrors.email) {
+                            setInquiryErrors({ ...inquiryErrors, email: "" });
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          inquiryErrors.email ? "border-red-500" : "border-gray-300"
+                        }`}
                         required
                       />
+                      {inquiryErrors.email && (
+                        <p className="mt-1 text-sm text-red-600">{inquiryErrors.email}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1205,15 +1364,23 @@ export default function PropertyDetailPage({ params }) {
                       <input
                         type="tel"
                         value={inquiryData.phone}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setInquiryData({
                             ...inquiryData,
                             phone: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          });
+                          if (inquiryErrors.phone) {
+                            setInquiryErrors({ ...inquiryErrors, phone: "" });
+                          }
+                        }}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                          inquiryErrors.phone ? "border-red-500" : "border-gray-300"
+                        }`}
                         required
                       />
+                      {inquiryErrors.phone && (
+                        <p className="mt-1 text-sm text-red-600">{inquiryErrors.phone}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1233,7 +1400,7 @@ export default function PropertyDetailPage({ params }) {
                     </div>
                     <button
                       type="submit"
-                      className="w-full px-4 py-2 bg-orange-custom text-white rounded-lg transition-colors"
+                      className="w-full px-4 py-2 bg-orange-custom text-white rounded-lg hover:bg-orange-600 transition-colors"
                     >
                       Send Inquiry
                     </button>
@@ -1328,6 +1495,7 @@ function CreatePropertyForm() {
     price: "",
     bedrooms: "",
     bathrooms: "",
+    phone: "",
     description: "",
     photos: "",
   // selected society/location from map picker
@@ -1580,6 +1748,17 @@ const handleSubmit = async (e) => {
                 <input type="number" value={form.bathrooms} onChange={(e) => update("bathrooms", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
               </div>
             </div>
+            
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => update("phone", e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg"
+                placeholder="+91 98765 43210"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Description</label>
@@ -1693,6 +1872,118 @@ const handleSubmit = async (e) => {
           </form>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {shareModalOpen && !isEditing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShareModalOpen(false)} />
+          <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold properties-text-color mb-4">Share Property</h3>
+            <p className="text-sm text-gray-600 mb-4">Choose how you'd like to share this property:</p>
+
+            <div className="space-y-3">
+              {navigator.share ? (
+                <button
+                  onClick={async () => {
+                    try {
+                      await navigator.share({
+                        title: property?.title || 'Property',
+                        text: property?.description || '',
+                        url: window.location.href,
+                      });
+                      setShareModalOpen(false);
+                    } catch (error) {
+                      console.log('Share cancelled or failed');
+                    }
+                  }}
+                  className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="w-8 h-8 bg-green-600 rounded mr-3 flex items-center justify-center">
+                    <span className="text-white text-sm">📱</span>
+                  </div>
+                  <span className="text-sm font-medium">Share via...</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      const shareUrl = window.location.href;
+                      const shareText = `${property?.title || 'Property'}\n${property?.description || ''}\n\n${shareUrl}`;
+                      // Try to open Teams app directly
+                      const teamsUrl = `https://teams.microsoft.com/share?href=${encodeURIComponent(shareUrl)}&msg=${encodeURIComponent(shareText)}`;
+                      window.open(teamsUrl, '_blank', 'noopener,noreferrer');
+                      setShareModalOpen(false);
+                    }}
+                    className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-blue-600 rounded mr-3 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">T</span>
+                    </div>
+                    <span className="text-sm font-medium">Share via Microsoft Teams</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const subject = encodeURIComponent(property?.title || 'Property Share');
+                      const body = encodeURIComponent(`${property?.description || ''}\n\nCheck out this property: ${window.location.href}`);
+                      const outlookUrl = `mailto:?subject=${subject}&body=${body}`;
+                      // Use window.open for better compatibility
+                      const mailtoWindow = window.open(outlookUrl, '_blank', 'noopener,noreferrer');
+                      // Fallback if popup is blocked
+                      if (!mailtoWindow) {
+                        window.location.href = outlookUrl;
+                      }
+                      setShareModalOpen(false);
+                    }}
+                    className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-blue-500 rounded mr-3 flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">O</span>
+                    </div>
+                    <span className="text-sm font-medium">Share via Outlook</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const shareText = `${property?.title || 'Property'}\n${property?.description || ''}\n\n${window.location.href}`;
+                      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+                      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+                      setShareModalOpen(false);
+                    }}
+                    className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-green-500 rounded mr-3 flex items-center justify-center">
+                      <span className="text-white text-sm">💬</span>
+                    </div>
+                    <span className="text-sm font-medium">Share via WhatsApp</span>
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard!");
+                  setShareModalOpen(false);
+                }}
+                className="w-full flex items-center p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-8 h-8 bg-gray-400 rounded mr-3 flex items-center justify-center">
+                  <span className="text-white text-sm">📋</span>
+                </div>
+                <span className="text-sm font-medium">Copy Link</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShareModalOpen(false)}
+              className="mt-4 w-full px-4 py-2 text-sm text-gray-600 border rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
