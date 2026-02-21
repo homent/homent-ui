@@ -785,7 +785,10 @@ function PropertyCard({ property, onContacted }) {
             onClick={handleSave}
             className={`p-2 rounded-full bg-white ${saved ? "text-red-500" : "text-gray-600"} hover:text-red-500 transition-colors`}
           >
-            <Heart className="h-4 w-4" />
+            <Heart 
+              className={`h-6 w-6 ${saved ? "text-red-500" : "text-gray-600"}`}
+              fill={saved ? "currentColor" : "none"}
+            />
           </button>
           <button
             onClick={handleShare}

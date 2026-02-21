@@ -33,6 +33,11 @@ export default function MoversPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
+  // Calculate tomorrow's date for min date restriction
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
+
   const vehicleTypes = [
     { value: "tempo", label: "Tempo (Basic)", capacity: "5-10 boxes" },
     { value: "truck", label: "Truck (Standard)", capacity: "20-30 boxes" },
@@ -378,6 +383,7 @@ export default function MoversPage() {
                     onChange={(e) =>
                       updateFormData("preferredMoveDate", e.target.value)
                     }
+                    min={minDate}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
