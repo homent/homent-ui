@@ -101,14 +101,23 @@ export default function PropertiesPage() {
       setLoadingMore(true);
     }
 
+    // Get user ID from localStorage if available
+    const userDetailsRaw = localStorage.getItem("userLoginDetails");
+    const userDetails = userDetailsRaw ? JSON.parse(userDetailsRaw) : null;
+    const userId = userDetails?.id;
+
     // Base query params required by new API
     const queryParams = new URLSearchParams({
       eventType: "GET_PROPERTY",
-      // userId: 1,
       status: "Active",
       pageNumber: page,
       pageSize: 20,
     });
+
+    // Add userId if present
+    if (userId) {
+      queryParams.append("userId", userId);
+    }
 
     // Append dynamic filters
     Object.entries(filters).forEach(([key, value]) => {
