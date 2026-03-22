@@ -34,7 +34,7 @@ export default function RentAgreementsList() {
             <div className="space-y-4">
               {agreements.length === 0 ? (
                 <div className="bg-white p-6 rounded shadow-sm text-gray-600">
-                  No agreements created yet (demo).
+                  No agreements created yet.
                 </div>
               ) : (
                 agreements.map((a) => (

@@ -38,12 +38,12 @@ export default function SiteHeader({ title, Icon }) {
     { to: "/properties/new", label: "Post Your Property" },
     { to: "/properties", label: "Properties" },
     { to: "/rental-property-management", label: "Property Management" },
-    { to: "/property-transfer/create-property-transfer", label: "Create Property Transfer" },
-    { to: "/property-transfer", label: "View Property Transfers List" },
-    { to: "/movers", label: "Request Packers & Movers" },
-    { to: "/movers/providers", label: "View Movers Providers User" },
-    { to: "/movers/create-agreement", label: "Create Rental Agreement" },
-    { to: "/agreements/rent", label: "View Rental Agreements User" },
+    // { to: "/property-transfer/create-property-transfer", label: "Create Property Transfer" },
+    { to: "/property-transfer", label: "Property Transfers" },
+    // { to: "/movers", label: "Create Packers & Movers" },
+    { to: "/movers/providers", label: "Movers Providers" },
+    // { to: "/movers/create-agreement", label: "Create Rental Agreemenst" },
+    { to: "/agreements/rent", label: "Rental Agreements" },
     { to: "/legal", label: "Request Legal Services" },
   ];
 
@@ -56,18 +56,16 @@ export default function SiteHeader({ title, Icon }) {
             {/* LEFT SECTION */}
             <div className="flex items-center gap-2">
               {Icon && 
-              // <Icon className="h-8 w-8" />
               <img src="/images/logo_homent.png" color="white" alt="Homent Logo" className="h-8 w-8" />
-              
               }
-              <span className="text-xl font-bold">Homent</span>
+              <Link href="/">
+                <span className="text-xl font-bold cursor-pointer hover:opacity-80 transition-opacity">Homent</span>
+              </Link>
               {title && (
                 <span className="hidden sm:block text-md opacity-90">
                   {title}
                 </span>
               )}
-              {/* <img src="/images/homent_logo.svg" alt="Logo" width="100" height="100"> */}
-              {/* </img> */}
             </div>
 
             {/* RIGHT SECTION */}

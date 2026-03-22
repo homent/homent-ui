@@ -126,7 +126,7 @@ export default function RentAgreementDetail() {
                     Call Tenant
                   </a>
                   <button
-                    onClick={() => alert("Marked as processed (demo)")}
+                    onClick={() => alert("Marked as processed")}
                     className="w-full px-4 py-2 border rounded-lg"
                   >
                     Mark Processed

@@ -1487,6 +1487,8 @@ export default function PropertyDetailPage({ params }) {
 function CreatePropertyForm() {
   const navigate = useRouter();
   const [saving, setSaving] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [property, setProperty] = useState(null);
   const [form, setForm] = useState({
     title: "",
     address: "",
@@ -1498,11 +1500,11 @@ function CreatePropertyForm() {
     phone: "",
     description: "",
     photos: "",
-  // selected society/location from map picker
-  society_name: "",
-  society_address: "",
-  society_lat: undefined,
-  society_lon: undefined,
+    // selected society/location from map picker
+    society_name: "",
+    society_address: "",
+    society_lat: undefined,
+    society_lon: undefined,
     total_floors: "",
     floor_number: "",
     property_age: "",
@@ -1811,7 +1813,7 @@ const handleSubmit = async (e) => {
 
                   setForm((s) => ({
                     ...(s || {}),
-                    uploadedFiles: [...(s.uploadedFiles || []), ...files], // ✅ keep File objects
+                    uploadedFiles: [...(s.uploadedFiles || []), ...files],
                   }));
 
                   // reset input so same file can be selected again

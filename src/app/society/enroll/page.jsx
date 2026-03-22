@@ -15,12 +15,8 @@ export default function EnrollSocietyPage() {
     apartmentType: "", // required
     city: "",
     apartmentName: "",
-    bhkType: "",
-    floorNumber: "",
     totalFloors: "",
     propertyAge: "",
-    facing: "",
-    builtUpArea: "",
     landmark: "",
     // other optional notes
     notes: "",
@@ -153,8 +149,6 @@ export default function EnrollSocietyPage() {
                 placeholder="Select apartment type"
                 isClearable
               />
-              {/* <select value={form.apartmentType} onChange={(e) => update("apartmentType", e.target.value)} required className="w-full px-3 py-2 border rounded-lg">
-                <option value="">Select apartment type</option> */}
             </div>
 
             <div>
@@ -194,39 +188,6 @@ export default function EnrollSocietyPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">BHK Type</label>
-                <select value={form.bhkType} onChange={(e) => update("bhkType", e.target.value)} className="w-full px-3 py-2 border rounded-lg">
-                  <option value="">Select</option>
-                  <option value="1 BHK">1 BHK</option>
-                  <option value="2 BHK">2 BHK</option>
-                  <option value="3 BHK">3 BHK</option>
-                  <option value="4+ BHK">4+ BHK</option>
-                  <option value="Studio">Studio</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Facing</label>
-                <select value={form.facing} onChange={(e) => update("facing", e.target.value)} className="w-full px-3 py-2 border rounded-lg">
-                  <option value="">Select</option>
-                  <option value="North">North</option>
-                  <option value="South">South</option>
-                  <option value="East">East</option>
-                  <option value="West">West</option>
-                  <option value="North-East">North-East</option>
-                  <option value="North-West">North-West</option>
-                  <option value="South-East">South-East</option>
-                  <option value="South-West">South-West</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Floor</label>
-                <input type="number" value={form.floorNumber} onChange={(e) => update("floorNumber", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-              </div>
-              <div>
                 <label className="block text-sm font-medium text-gray-700">Total Floors</label>
                 <input type="number" value={form.totalFloors} onChange={(e) => update("totalFloors", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
               </div>
@@ -236,21 +197,15 @@ export default function EnrollSocietyPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Built Up Area (sqft)</label>
-                <input type="number" value={form.builtUpArea} onChange={(e) => update("builtUpArea", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Landmark / Street</label>
-                <input value={form.landmark} onChange={(e) => update("landmark", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Landmark / Street</label>
+              <input value={form.landmark} onChange={(e) => update("landmark", e.target.value)} className="w-full px-3 py-2 border rounded-lg" />
             </div>
 
             <div>
                 <label className="block text-sm font-medium text-gray-700">Amenities (comma separated)</label>
                 <input value={form.amenities} onChange={(e) => update("amenities", e.target.value)} className="w-full px-3 py-2 border rounded-lg" placeholder="Gym, Swimming Pool, Security" />
-              </div>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Additional Notes</label>
@@ -334,8 +289,6 @@ export default function EnrollSocietyPage() {
             </div>
           </form>
         </div>
-
-        {/* <div className="mt-6 text-sm text-gray-600">Saved societies are stored locally (localStorage key: <code>enrolled_societies</code>).</div> */}
       </main>
     </div>
   );
